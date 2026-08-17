@@ -222,6 +222,8 @@ On messaging platforms, the agent sends the dangerous command details to the cha
 
 The `HERMES_EXEC_ASK=1` environment variable is automatically set when running the gateway.
 
+When several parallel tool calls (or subagents in the same session) hit the **same dangerous command** at the same time, the gateway presents **one** approval prompt and applies your single answer to all of them — you won't be asked N times for N identical calls. Different commands still prompt separately.
+
 ### Permanent Allowlist
 
 Commands approved with "always" are saved to `~/.hermes/config.yaml`:
@@ -234,6 +236,8 @@ command_allowlist:
 ```
 
 These patterns are loaded at startup and silently approved in all future sessions.
+
+Allowlist glob rules are quote-aware: a command like `cargo bench -- '^layer3/(a|b)$'` matches a `cargo *` rule because the metacharacters are inside single quotes and therefore literal to the shell. Unquoted shell operators (`;`, `&`, `|`, `<`, `>`, `` ` ``, `$(`), `$`/backtick inside double quotes (where expansion is live), and quoted payloads handed to another interpreter (`sh -c '...'`, `git -c alias.x='!...'`) still disqualify the command and fall back to a normal approval prompt.
 
 :::tip
 Use `hermes config edit` to review or remove patterns from your permanent allowlist.
