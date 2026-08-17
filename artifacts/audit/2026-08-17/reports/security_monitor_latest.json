@@ -1,0 +1,27 @@
+{
+  "ts": "2026-08-17T05:50:24.353628+00:00",
+  "status": "ok",
+  "findings_count": 2,
+  "findings": [
+    {
+      "type": "security_email",
+      "title": "Newsletter: workflow tips",
+      "from": "sender7@example.com",
+      "risk": "high",
+      "source": "email_triage",
+      "requires_action": true,
+      "action": "review_email"
+    },
+    {
+      "type": "security_email",
+      "title": "Security alert: unusual sign-in",
+      "from": "sender9@example.com",
+      "risk": "medium",
+      "source": "email_triage",
+      "requires_action": true,
+      "action": "review_email"
+    }
+  ],
+  "requires_approval": false,
+  "note": "Defensive security monitor pass over triage inputs."
+}

@@ -1,0 +1,353 @@
+[
+  {
+    "timestamp": "2026-08-17T02:14:01.458490+00:00",
+    "action": "upwork_research",
+    "agent": "upwork_research",
+    "source": "upwork_research.py",
+    "reason": "Scan approved research pool and score opportunities",
+    "input": {
+      "count": 3
+    },
+    "output": {
+      "ranked": 3
+    },
+    "risk": "low",
+    "result": "success",
+    "approval_status": "queued"
+  },
+  {
+    "timestamp": "2026-08-17T02:14:18.430622+00:00",
+    "action": "market_monitor",
+    "agent": "market_monitor",
+    "source": "market_monitor.py",
+    "reason": "Collect public-market snapshot for watchlist",
+    "input": {
+      "watchlist_size": 3
+    },
+    "output": {
+      "snapshots": 3
+    },
+    "risk": "low",
+    "result": "success"
+  },
+  {
+    "timestamp": "2026-08-17T02:17:01.348343+00:00",
+    "action": "social_content",
+    "agent": "social_content",
+    "source": "social_content.py",
+    "reason": "Generate approved-channel content drafts from live pipeline data",
+    "input": {},
+    "output": {
+      "drafts": 2
+    },
+    "risk": "low",
+    "result": "success",
+    "approval_status": "queued"
+  },
+  {
+    "timestamp": "2026-08-17T02:17:28.350263+00:00",
+    "action": "evening_review",
+    "agent": "evening_review",
+    "source": "evening_review.py",
+    "reason": "Compile daily operational review from pipeline outputs",
+    "input": {},
+    "output": {
+      "status": "ok"
+    },
+    "risk": "low",
+    "result": "success"
+  },
+  {
+    "timestamp": "2026-08-17T03:12:34.938722+00:00",
+    "action": "market_monitor",
+    "agent": "market_monitor",
+    "source": "market_monitor.py",
+    "reason": "Collect public-market snapshot for watchlist",
+    "input": {
+      "watchlist_size": 4
+    },
+    "output": {
+      "snapshots": 4
+    },
+    "risk": "low",
+    "result": "success"
+  },
+  {
+    "timestamp": "2026-08-17T03:14:10.487355+00:00",
+    "action": "upwork_research",
+    "agent": "upwork_research",
+    "source": "upwork_research.py",
+    "reason": "Scan approved research pool and score opportunities",
+    "input": {
+      "count": 3
+    },
+    "output": {
+      "ranked": 0
+    },
+    "risk": "low",
+    "result": "success",
+    "approval_status": "queued"
+  },
+  {
+    "timestamp": "2026-08-17T03:14:10.605225+00:00",
+    "action": "market_monitor",
+    "agent": "market_monitor",
+    "source": "market_monitor.py",
+    "reason": "Collect public-market snapshot for watchlist",
+    "input": {
+      "watchlist_size": 4
+    },
+    "output": {
+      "snapshots": 4
+    },
+    "risk": "low",
+    "result": "success"
+  },
+  {
+    "timestamp": "2026-08-17T03:14:37.718213+00:00",
+    "action": "market_monitor",
+    "agent": "market_monitor",
+    "source": "market_monitor.py",
+    "reason": "Collect public-market snapshot for watchlist",
+    "input": {
+      "watchlist_size": 4
+    },
+    "output": {
+      "snapshots": 4
+    },
+    "risk": "low",
+    "result": "success"
+  },
+  {
+    "timestamp": "2026-08-17T03:15:44.628888+00:00",
+    "action": "upwork_research",
+    "agent": "upwork_research",
+    "source": "upwork_research.py",
+    "reason": "Scan approved research pool and score opportunities",
+    "input": {
+      "count": 3
+    },
+    "output": {
+      "ranked": 0
+    },
+    "risk": "low",
+    "result": "success",
+    "approval_status": "queued"
+  },
+  {
+    "timestamp": "2026-08-17T03:15:44.749845+00:00",
+    "action": "social_content",
+    "agent": "social_content",
+    "source": "social_content.py",
+    "reason": "Generate approved-channel content drafts from live pipeline data",
+    "input": {},
+    "output": {
+      "drafts": 2
+    },
+    "risk": "low",
+    "result": "success",
+    "approval_status": "queued"
+  },
+  {
+    "timestamp": "2026-08-17T03:15:44.943155+00:00",
+    "action": "evening_review",
+    "agent": "evening_review",
+    "source": "evening_review.py",
+    "reason": "Compile daily operational review from pipeline outputs",
+    "input": {},
+    "output": {
+      "status": "ok"
+    },
+    "risk": "low",
+    "result": "success"
+  },
+  {
+    "timestamp": "2026-08-17T03:15:53.812199+00:00",
+    "action": "upwork_research",
+    "agent": "upwork_research",
+    "source": "upwork_research.py",
+    "reason": "Scan approved research pool and score opportunities",
+    "input": {
+      "count": 3
+    },
+    "output": {
+      "ranked": 0
+    },
+    "risk": "low",
+    "result": "success",
+    "approval_status": "queued"
+  },
+  {
+    "timestamp": "2026-08-17T03:15:53.920542+00:00",
+    "action": "market_monitor",
+    "agent": "market_monitor",
+    "source": "market_monitor.py",
+    "reason": "Collect public-market snapshot for watchlist",
+    "input": {
+      "watchlist_size": 4
+    },
+    "output": {
+      "snapshots": 4
+    },
+    "risk": "low",
+    "result": "success"
+  },
+  {
+    "timestamp": "2026-08-17T03:15:54.032905+00:00",
+    "action": "social_content",
+    "agent": "social_content",
+    "source": "social_content.py",
+    "reason": "Generate approved-channel content drafts from live pipeline data",
+    "input": {},
+    "output": {
+      "drafts": 2
+    },
+    "risk": "low",
+    "result": "success",
+    "approval_status": "queued"
+  },
+  {
+    "timestamp": "2026-08-17T03:15:54.161266+00:00",
+    "action": "evening_review",
+    "agent": "evening_review",
+    "source": "evening_review.py",
+    "reason": "Compile daily operational review from pipeline outputs",
+    "input": {},
+    "output": {
+      "status": "ok"
+    },
+    "risk": "low",
+    "result": "success"
+  },
+  {
+    "timestamp": "2026-08-17T03:16:31.085525+00:00",
+    "action": "upwork_research",
+    "agent": "upwork_research",
+    "source": "upwork_research.py",
+    "reason": "Scan approved research pool and score opportunities",
+    "input": {
+      "count": 3
+    },
+    "output": {
+      "ranked": 0
+    },
+    "risk": "low",
+    "result": "success",
+    "approval_status": "queued"
+  },
+  {
+    "timestamp": "2026-08-17T03:16:31.233285+00:00",
+    "action": "social_content",
+    "agent": "social_content",
+    "source": "social_content.py",
+    "reason": "Generate approved-channel content drafts from live pipeline data",
+    "input": {},
+    "output": {
+      "drafts": 2
+    },
+    "risk": "low",
+    "result": "success",
+    "approval_status": "queued"
+  },
+  {
+    "timestamp": "2026-08-17T03:16:31.374218+00:00",
+    "action": "evening_review",
+    "agent": "evening_review",
+    "source": "evening_review.py",
+    "reason": "Compile daily operational review from pipeline outputs",
+    "input": {},
+    "output": {
+      "status": "ok"
+    },
+    "risk": "low",
+    "result": "success"
+  },
+  {
+    "timestamp": "2026-08-17T05:50:23.677146+00:00",
+    "action": "upwork_research",
+    "agent": "upwork_research",
+    "source": "upwork_research.py",
+    "reason": "Scan approved research pool and score opportunities",
+    "input": {
+      "count": 3
+    },
+    "output": {
+      "ranked": 0
+    },
+    "risk": "low",
+    "result": "success",
+    "approval_status": "queued"
+  },
+  {
+    "timestamp": "2026-08-17T05:50:23.797229+00:00",
+    "action": "market_monitor",
+    "agent": "market_monitor",
+    "source": "market_monitor.py",
+    "reason": "Collect public-market snapshot for watchlist",
+    "input": {
+      "watchlist_size": 4
+    },
+    "output": {
+      "snapshots": 4
+    },
+    "risk": "low",
+    "result": "success"
+  },
+  {
+    "timestamp": "2026-08-17T05:50:23.921162+00:00",
+    "action": "social_content",
+    "agent": "social_content",
+    "source": "social_content.py",
+    "reason": "Generate approved-channel content drafts from live pipeline data",
+    "input": {},
+    "output": {
+      "drafts": 2
+    },
+    "risk": "low",
+    "result": "success",
+    "approval_status": "queued"
+  },
+  {
+    "timestamp": "2026-08-17T05:50:24.121692+00:00",
+    "action": "evening_review",
+    "agent": "evening_review",
+    "source": "evening_review.py",
+    "reason": "Compile daily operational review from pipeline outputs",
+    "input": {},
+    "output": {
+      "status": "ok"
+    },
+    "risk": "low",
+    "result": "success"
+  },
+  {
+    "timestamp": "2026-08-17T05:55:41.664203+00:00",
+    "action": "social_content",
+    "agent": "social_content",
+    "source": "social_content.py",
+    "reason": "Generate approved-channel content drafts from live pipeline data",
+    "input": {},
+    "output": {
+      "drafts": 2
+    },
+    "risk": "low",
+    "result": "success",
+    "approval_status": "queued"
+  },
+  {
+    "timestamp": "2026-08-17T05:58:07.158697+00:00",
+    "action": "upwork_research",
+    "agent": "upwork_research",
+    "source": "upwork_research.py",
+    "reason": "Scan approved research pool and score opportunities",
+    "input": {
+      "count": 3
+    },
+    "output": {
+      "ranked": 3
+    },
+    "risk": "low",
+    "result": "success",
+    "approval_status": "queued"
+  }
+]

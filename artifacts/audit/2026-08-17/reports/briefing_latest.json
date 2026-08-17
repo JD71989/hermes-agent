@@ -1,0 +1,100 @@
+{
+  "ts": "2026-08-17T05:50:23.440779+00:00",
+  "status": "ok",
+  "date": "2026-08-17",
+  "inbox": {
+    "total": 12,
+    "urgent": 1,
+    "important": 1,
+    "needs_reply": 2
+  },
+  "followups": {
+    "waiting_me": 12,
+    "waiting_them": 0,
+    "overdue": 0
+  },
+  "top_actions": [
+    {
+      "type": "email",
+      "id": "c5df94e0",
+      "title": "Newsletter: workflow tips",
+      "from": "sender7@example.com",
+      "due": "2026-08-19",
+      "needs_reply": true
+    },
+    {
+      "type": "email",
+      "id": "99d26e72",
+      "title": "Meeting recap and next steps",
+      "from": "sender12@example.com",
+      "due": "2026-08-22",
+      "needs_reply": true
+    },
+    {
+      "type": "followup",
+      "id": "FUP-000001",
+      "title": "Meeting recap and next steps",
+      "from": "sender2@example.com",
+      "due": "2026-08-22",
+      "needs_reply": true
+    },
+    {
+      "type": "followup",
+      "id": "FUP-000005",
+      "title": "Client feedback on latest deliverable",
+      "from": "sender11@example.com",
+      "due": "2026-08-22",
+      "needs_reply": true
+    },
+    {
+      "type": "followup",
+      "id": "FUP-000004",
+      "title": "Client feedback on latest deliverable",
+      "from": "sender1@example.com",
+      "due": "2026-08-19",
+      "needs_reply": true
+    },
+    {
+      "type": "followup",
+      "id": "FUP-000006",
+      "title": "Security alert: unusual sign-in",
+      "from": "sender9@example.com",
+      "due": "2026-08-19",
+      "needs_reply": true
+    },
+    {
+      "type": "followup",
+      "id": "FUP-000006",
+      "title": "Contract renewal reminder",
+      "from": "sender4@example.com",
+      "due": "2026-08-22",
+      "needs_reply": true
+    },
+    {
+      "type": "followup",
+      "id": "FUP-000008",
+      "title": "Lead follow-up: pricing question",
+      "from": "sender6@example.com",
+      "due": "2026-08-22",
+      "needs_reply": true
+    },
+    {
+      "type": "followup",
+      "id": "FUP-000010",
+      "title": "Invoice overdue for project Alpha",
+      "from": "sender10@example.com",
+      "due": "2026-08-22",
+      "needs_reply": true
+    },
+    {
+      "type": "followup",
+      "id": "FUP-000009",
+      "title": "Promo: limited-time offer",
+      "from": "sender8@example.com",
+      "due": "2026-08-19",
+      "needs_reply": true
+    }
+  ],
+  "requires_approval": false,
+  "note": "Daily briefing compiled from triage and follow-up tracking."
+}

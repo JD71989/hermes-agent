@@ -1,0 +1,49 @@
+{
+  "ts": "2026-08-17T05:50:23.797229+00:00",
+  "status": "ok",
+  "symbols_count": 4,
+  "symbols": [
+    {
+      "symbol": "BTC-USD",
+      "name": "Bitcoin",
+      "type": "crypto",
+      "price": null,
+      "change_24h": null,
+      "source": "public-market-data",
+      "timestamp": "2026-08-17T05:50:23.797229+00:00",
+      "note": "No live market integration in MPV; placeholder snapshot."
+    },
+    {
+      "symbol": "ETH-USD",
+      "name": "Ethereum",
+      "type": "crypto",
+      "price": null,
+      "change_24h": null,
+      "source": "public-market-data",
+      "timestamp": "2026-08-17T05:50:23.797229+00:00",
+      "note": "No live market integration in MPV; placeholder snapshot."
+    },
+    {
+      "symbol": "SPY",
+      "name": "S&P 500 ETF",
+      "type": "equity",
+      "price": null,
+      "change_24h": null,
+      "source": "public-market-data",
+      "timestamp": "2026-08-17T05:50:23.797229+00:00",
+      "note": "No live market integration in MPV; placeholder snapshot."
+    },
+    {
+      "symbol": "QQQ",
+      "name": "Nasdaq 100 ETF",
+      "type": "equity",
+      "price": null,
+      "change_24h": null,
+      "source": "public-market-data",
+      "timestamp": "2026-08-17T05:50:23.797229+00:00",
+      "note": "No live market integration in MPV; placeholder snapshot."
+    }
+  ],
+  "requires_approval_for_execution": true,
+  "note": "Market monitor snapshot. No trades executed."
+}

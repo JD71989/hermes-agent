@@ -1,0 +1,124 @@
+{
+  "ts": "2026-08-17T05:50:23.138051+00:00",
+  "status": "ok",
+  "integration": "email_inbox_triage",
+  "date": "2026-08-17",
+  "inbox_summary": {
+    "urgent": 1,
+    "important": 1,
+    "normal": 2,
+    "low_value": 4,
+    "spam": 4
+  },
+  "requires_approval": false,
+  "emails": [
+    {
+      "id": "b75889ec",
+      "subject": "Client feedback on latest deliverable",
+      "from": "sender1@example.com",
+      "category": "low_value",
+      "label": "Optional / low signal",
+      "needs_reply": false,
+      "followup_due": "2026-08-22"
+    },
+    {
+      "id": "a356e78b",
+      "subject": "Meeting recap and next steps",
+      "from": "sender2@example.com",
+      "category": "spam",
+      "label": "Discard / ignore",
+      "needs_reply": false,
+      "followup_due": "2026-08-22"
+    },
+    {
+      "id": "929c654d",
+      "subject": "Weekly ops sync notes",
+      "from": "sender3@example.com",
+      "category": "low_value",
+      "label": "Optional / low signal",
+      "needs_reply": false,
+      "followup_due": "2026-08-22"
+    },
+    {
+      "id": "3f08d0b4",
+      "subject": "Contract renewal reminder",
+      "from": "sender4@example.com",
+      "category": "low_value",
+      "label": "Optional / low signal",
+      "needs_reply": false,
+      "followup_due": "2026-08-22"
+    },
+    {
+      "id": "d7a9b6f5",
+      "subject": "Support ticket status update",
+      "from": "sender5@example.com",
+      "category": "spam",
+      "label": "Discard / ignore",
+      "needs_reply": false,
+      "followup_due": "2026-08-22"
+    },
+    {
+      "id": "5e8fdac6",
+      "subject": "Lead follow-up: pricing question",
+      "from": "sender6@example.com",
+      "category": "spam",
+      "label": "Discard / ignore",
+      "needs_reply": false,
+      "followup_due": "2026-08-22"
+    },
+    {
+      "id": "c5df94e0",
+      "subject": "Newsletter: workflow tips",
+      "from": "sender7@example.com",
+      "category": "urgent",
+      "label": "Needs response within hours",
+      "needs_reply": true,
+      "followup_due": "2026-08-19"
+    },
+    {
+      "id": "8f52312c",
+      "subject": "Promo: limited-time offer",
+      "from": "sender8@example.com",
+      "category": "normal",
+      "label": "FYI / no action needed",
+      "needs_reply": false,
+      "followup_due": "2026-08-22"
+    },
+    {
+      "id": "308f9032",
+      "subject": "Security alert: unusual sign-in",
+      "from": "sender9@example.com",
+      "category": "low_value",
+      "label": "Optional / low signal",
+      "needs_reply": false,
+      "followup_due": "2026-08-22"
+    },
+    {
+      "id": "6eddfde0",
+      "subject": "Invoice overdue for project Alpha",
+      "from": "sender10@example.com",
+      "category": "normal",
+      "label": "FYI / no action needed",
+      "needs_reply": false,
+      "followup_due": "2026-08-22"
+    },
+    {
+      "id": "ff6d8e00",
+      "subject": "Client feedback on latest deliverable",
+      "from": "sender11@example.com",
+      "category": "spam",
+      "label": "Discard / ignore",
+      "needs_reply": false,
+      "followup_due": "2026-08-22"
+    },
+    {
+      "id": "99d26e72",
+      "subject": "Meeting recap and next steps",
+      "from": "sender12@example.com",
+      "category": "important",
+      "label": "Actionable within 1-2 days",
+      "needs_reply": true,
+      "followup_due": "2026-08-22"
+    }
+  ]
+}

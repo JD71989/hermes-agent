@@ -1,0 +1,122 @@
+[
+  {
+    "id": "UW-1002",
+    "type": "lead_outreach",
+    "source": "upwork_research",
+    "title": "Windows PowerShell hardening assessment",
+    "risk": "low",
+    "status": "approved",
+    "created_at": "2026-08-17T02:14:01.458490+00:00",
+    "approved_at": "2026-08-17T06:02:54.621418+00:00"
+  },
+  {
+    "id": "UW-1001",
+    "type": "lead_outreach",
+    "source": "upwork_research",
+    "title": "Automate invoice parsing with Python",
+    "risk": "low",
+    "status": "approved",
+    "created_at": "2026-08-17T02:14:01.458490+00:00",
+    "approved_at": "2026-08-17T06:02:54.622419+00:00"
+  },
+  {
+    "id": "UW-1003",
+    "type": "lead_outreach",
+    "source": "upwork_research",
+    "title": "Lightweight Flask API scaffold",
+    "risk": "low",
+    "status": "approved",
+    "created_at": "2026-08-17T02:14:01.458490+00:00",
+    "approved_at": "2026-08-17T06:02:54.622419+00:00"
+  },
+  {
+    "id": "SC-Acme Corp-Jordan Smith",
+    "type": "social_publish",
+    "source": "social_content",
+    "title": "Engagement note: posted SaaS automation RFQ @ Acme Corp",
+    "risk": "low",
+    "status": "approved",
+    "created_at": "2026-08-17T02:17:01.348343+00:00",
+    "approved_at": "2026-08-17T06:02:54.622419+00:00"
+  },
+  {
+    "id": "SC-BetaOps-Casey Reed",
+    "type": "social_publish",
+    "source": "social_content",
+    "title": "Engagement note: downloaded pricing guide @ BetaOps",
+    "risk": "low",
+    "status": "approved",
+    "created_at": "2026-08-17T02:17:01.348343+00:00",
+    "approved_at": "2026-08-17T06:02:54.622419+00:00"
+  },
+  {
+    "id": "RISK-000001",
+    "type": "trade_research",
+    "source": "risk_evaluator",
+    "title": "Research/evaluate execution plan for BTC-USD",
+    "risk": "low",
+    "status": "approved",
+    "created_at": "2026-08-17T02:25:49.492584+00:00",
+    "approved_at": "2026-08-17T06:02:54.622419+00:00"
+  },
+  {
+    "id": "RISK-000002",
+    "type": "trade_research",
+    "source": "risk_evaluator",
+    "title": "Research/evaluate execution plan for ETH-USD",
+    "risk": "low",
+    "status": "approved",
+    "created_at": "2026-08-17T02:25:49.494598+00:00",
+    "approved_at": "2026-08-17T06:02:54.622419+00:00"
+  },
+  {
+    "id": "RISK-000003",
+    "type": "trade_research",
+    "source": "risk_evaluator",
+    "title": "Research/evaluate execution plan for SPY",
+    "risk": "low",
+    "status": "approved",
+    "created_at": "2026-08-17T02:25:49.497105+00:00",
+    "approved_at": "2026-08-17T06:02:54.622419+00:00"
+  },
+  {
+    "id": "RISK-000004",
+    "type": "trade_research",
+    "source": "risk_evaluator",
+    "title": "Research/evaluate execution plan for QQQ",
+    "risk": "low",
+    "status": "approved",
+    "created_at": "2026-08-17T02:25:49.497105+00:00",
+    "approved_at": "2026-08-17T06:02:54.622419+00:00"
+  },
+  {
+    "id": "UW-1002",
+    "type": "lead_outreach",
+    "source": "upwork_research",
+    "title": "Windows PowerShell hardening assessment",
+    "risk": "low",
+    "status": "approved",
+    "created_at": "2026-08-17T05:58:07.158697+00:00",
+    "approved_at": "2026-08-17T06:02:54.622419+00:00"
+  },
+  {
+    "id": "UW-1001",
+    "type": "lead_outreach",
+    "source": "upwork_research",
+    "title": "Automate invoice parsing with Python",
+    "risk": "low",
+    "status": "approved",
+    "created_at": "2026-08-17T05:58:07.158697+00:00",
+    "approved_at": "2026-08-17T06:02:54.622419+00:00"
+  },
+  {
+    "id": "UW-1003",
+    "type": "lead_outreach",
+    "source": "upwork_research",
+    "title": "Lightweight Flask API scaffold",
+    "risk": "low",
+    "status": "approved",
+    "created_at": "2026-08-17T05:58:07.158697+00:00",
+    "approved_at": "2026-08-17T06:02:54.622419+00:00"
+  }
+]

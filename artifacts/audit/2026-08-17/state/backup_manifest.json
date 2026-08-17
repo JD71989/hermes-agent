@@ -1,0 +1,194 @@
+{
+  "backups": [
+    {
+      "ts": "2026-08-16T22:05:18.392081+00:00",
+      "root": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260816",
+      "files": [
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\queue\\work_queue.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260816\\automation\\queue\\work_queue.json",
+          "bytes": 174
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\state\\jobs.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260816\\automation\\state\\jobs.json",
+          "bytes": 13736
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\approvals\\queue.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260816\\automation\\approvals\\queue.json",
+          "bytes": 540
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\reports\\email_triage_latest.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260816\\automation\\reports\\email_triage_latest.json",
+          "bytes": 390
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\followup\\tracking.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260816\\automation\\followup\\tracking.json",
+          "bytes": 202
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\crm\\contacts.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260816\\automation\\crm\\contacts.json",
+          "bytes": 202
+        }
+      ]
+    },
+    {
+      "ts": "2026-08-17T00:00:52.722311+00:00",
+      "root": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817",
+      "files": [
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\queue\\work_queue.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\queue\\work_queue.json",
+          "bytes": 174
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\state\\jobs.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\state\\jobs.json",
+          "bytes": 13743
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\approvals\\queue.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\approvals\\queue.json",
+          "bytes": 560
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\reports\\email_triage_latest.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\reports\\email_triage_latest.json",
+          "bytes": 3489
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\followup\\tracking.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\followup\\tracking.json",
+          "bytes": 1502
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\crm\\contacts.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\crm\\contacts.json",
+          "bytes": 202
+        }
+      ]
+    },
+    {
+      "ts": "2026-08-17T02:24:11.002374+00:00",
+      "root": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817",
+      "files": [
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\queue\\work_queue.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\queue\\work_queue.json",
+          "bytes": 174
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\state\\jobs.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\state\\jobs.json",
+          "bytes": 13742
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\approvals\\queue.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\approvals\\queue.json",
+          "bytes": 1971
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\reports\\email_triage_latest.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\reports\\email_triage_latest.json",
+          "bytes": 3513
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\followup\\tracking.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\followup\\tracking.json",
+          "bytes": 4002
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\crm\\contacts.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\crm\\contacts.json",
+          "bytes": 2067
+        }
+      ]
+    },
+    {
+      "ts": "2026-08-17T03:15:55.380269+00:00",
+      "root": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817",
+      "files": [
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\queue\\work_queue.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\queue\\work_queue.json",
+          "bytes": 174
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\state\\jobs.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\state\\jobs.json",
+          "bytes": 13742
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\approvals\\queue.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\approvals\\queue.json",
+          "bytes": 2365
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\reports\\email_triage_latest.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\reports\\email_triage_latest.json",
+          "bytes": 3497
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\followup\\tracking.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\followup\\tracking.json",
+          "bytes": 4823
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\crm\\contacts.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\crm\\contacts.json",
+          "bytes": 2069
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\markets\\watchlist.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\markets\\watchlist.json",
+          "bytes": 453
+        }
+      ]
+    },
+    {
+      "ts": "2026-08-17T05:50:25.224334+00:00",
+      "root": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817",
+      "files": [
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\queue\\work_queue.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\queue\\work_queue.json",
+          "bytes": 174
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\state\\jobs.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\state\\jobs.json",
+          "bytes": 13742
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\approvals\\queue.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\approvals\\queue.json",
+          "bytes": 2365
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\reports\\email_triage_latest.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\reports\\email_triage_latest.json",
+          "bytes": 3475
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\followup\\tracking.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\followup\\tracking.json",
+          "bytes": 5238
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\crm\\contacts.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\crm\\contacts.json",
+          "bytes": 2069
+        },
+        {
+          "source": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\markets\\watchlist.json",
+          "dest": "C:\\Users\\jamie\\AppData\\Local\\hermes\\automation\\backups\\20260817\\automation\\markets\\watchlist.json",
+          "bytes": 453
+        }
+      ]
+    }
+  ]
+}

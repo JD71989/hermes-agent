@@ -1,0 +1,25 @@
+{
+  "ts": "2026-08-17T05:55:41.664203+00:00",
+  "status": "ok",
+  "drafts": 2,
+  "items": [
+    {
+      "id": "SC-Acme Corp-Jordan Smith",
+      "channel": "linkedin",
+      "topic": "Engagement note: posted SaaS automation RFQ @ Acme Corp",
+      "requires_approval": true,
+      "status": "draft",
+      "created_at": "2026-08-17T05:55:41.664203+00:00"
+    },
+    {
+      "id": "SC-BetaOps-Casey Reed",
+      "channel": "linkedin",
+      "topic": "Engagement note: downloaded pricing guide @ BetaOps",
+      "requires_approval": true,
+      "status": "draft",
+      "created_at": "2026-08-17T05:55:41.664203+00:00"
+    }
+  ],
+  "requires_approval": true,
+  "note": "Social content drafts generated from live pipeline data."
+}

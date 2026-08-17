@@ -1,0 +1,58 @@
+{
+  "ts": "2026-08-17T05:58:07.158697+00:00",
+  "status": "ok",
+  "total": 3,
+  "ranked_count": 3,
+  "top": [
+    {
+      "id": "UW-1002",
+      "title": "Windows PowerShell hardening assessment",
+      "budget": 1200,
+      "client_rating": 4.8,
+      "fit": 8,
+      "competition": 3,
+      "repeat_potential": 4,
+      "strategic_value": 7,
+      "expected_profit": 980,
+      "deadline_days": 21,
+      "score": 65,
+      "status": "review",
+      "created_at": "2026-08-17T05:58:07.158697+00:00",
+      "requires_approval": true
+    },
+    {
+      "id": "UW-1001",
+      "title": "Automate invoice parsing with Python",
+      "budget": 850,
+      "client_rating": 4.6,
+      "fit": 7,
+      "competition": 4,
+      "repeat_potential": 6,
+      "strategic_value": 5,
+      "expected_profit": 620,
+      "deadline_days": 14,
+      "score": 60,
+      "status": "review",
+      "created_at": "2026-08-17T05:58:07.158697+00:00",
+      "requires_approval": true
+    },
+    {
+      "id": "UW-1003",
+      "title": "Lightweight Flask API scaffold",
+      "budget": 500,
+      "client_rating": 4.1,
+      "fit": 8,
+      "competition": 6,
+      "repeat_potential": 3,
+      "strategic_value": 4,
+      "expected_profit": 360,
+      "deadline_days": 10,
+      "score": 53,
+      "status": "review",
+      "created_at": "2026-08-17T05:58:07.158697+00:00",
+      "requires_approval": true
+    }
+  ],
+  "requires_approval": true,
+  "note": "Upwork opportunity scan and ranking."
+}

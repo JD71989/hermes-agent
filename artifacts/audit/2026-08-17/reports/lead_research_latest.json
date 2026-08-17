@@ -1,0 +1,75 @@
+{
+  "ts": "2026-08-17T05:50:23.551125+00:00",
+  "status": "ok",
+  "total_leads": 5,
+  "qualified_count": 2,
+  "high_fit": [
+    {
+      "company": "Acme Corp",
+      "contact": "Jordan Smith",
+      "source": "upwork",
+      "signal": "posted SaaS automation RFQ",
+      "score": 91,
+      "fit": "high",
+      "status": "new"
+    },
+    {
+      "company": "DeltaCloud",
+      "contact": "Riley Turner",
+      "source": "upwork",
+      "signal": "hired similar vendor last quarter",
+      "score": 76,
+      "fit": "high",
+      "status": "new"
+    }
+  ],
+  "all_leads": [
+    {
+      "company": "Acme Corp",
+      "contact": "Jordan Smith",
+      "source": "upwork",
+      "signal": "posted SaaS automation RFQ",
+      "score": 91,
+      "fit": "high",
+      "status": "new"
+    },
+    {
+      "company": "BetaOps",
+      "contact": "Casey Reed",
+      "source": "website",
+      "signal": "downloaded pricing guide",
+      "score": 53,
+      "fit": "medium",
+      "status": "new"
+    },
+    {
+      "company": "GammaLabs",
+      "contact": "Avery Brooks",
+      "source": "referral",
+      "signal": "referred by existing client",
+      "score": 47,
+      "fit": "low",
+      "status": "new"
+    },
+    {
+      "company": "DeltaCloud",
+      "contact": "Riley Turner",
+      "source": "upwork",
+      "signal": "hired similar vendor last quarter",
+      "score": 76,
+      "fit": "high",
+      "status": "new"
+    },
+    {
+      "company": "EpsilonIO",
+      "contact": "Morgan Price",
+      "source": "cold_outreach",
+      "signal": "replied to intro email",
+      "score": 60,
+      "fit": "medium",
+      "status": "new"
+    }
+  ],
+  "requires_approval": false,
+  "note": "Lead research scoring for CRM routing."
+}

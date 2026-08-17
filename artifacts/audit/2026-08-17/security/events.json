@@ -1,0 +1,58 @@
+[
+  {
+    "ts": "2026-08-17T02:24:53.342971+00:00",
+    "type": "security_email",
+    "title": "Promo: limited-time offer",
+    "risk": "high",
+    "action": "review_email"
+  },
+  {
+    "ts": "2026-08-17T02:24:53.342971+00:00",
+    "type": "security_email",
+    "title": "Security alert: unusual sign-in",
+    "risk": "medium",
+    "action": "review_email"
+  },
+  {
+    "ts": "2026-08-17T03:11:07.761841+00:00",
+    "type": "security_email",
+    "title": "Promo: limited-time offer",
+    "risk": "high",
+    "action": "review_email"
+  },
+  {
+    "ts": "2026-08-17T03:11:07.761841+00:00",
+    "type": "security_email",
+    "title": "Security alert: unusual sign-in",
+    "risk": "medium",
+    "action": "review_email"
+  },
+  {
+    "ts": "2026-08-17T03:15:54.608042+00:00",
+    "type": "security_email",
+    "title": "Promo: limited-time offer",
+    "risk": "high",
+    "action": "review_email"
+  },
+  {
+    "ts": "2026-08-17T03:15:54.608042+00:00",
+    "type": "security_email",
+    "title": "Security alert: unusual sign-in",
+    "risk": "medium",
+    "action": "review_email"
+  },
+  {
+    "ts": "2026-08-17T05:50:24.353628+00:00",
+    "type": "security_email",
+    "title": "Newsletter: workflow tips",
+    "risk": "high",
+    "action": "review_email"
+  },
+  {
+    "ts": "2026-08-17T05:50:24.353628+00:00",
+    "type": "security_email",
+    "title": "Security alert: unusual sign-in",
+    "risk": "medium",
+    "action": "review_email"
+  }
+]

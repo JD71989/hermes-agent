@@ -1,0 +1,25 @@
+{
+  "updated_at": "2026-08-17T03:12:34.939722+00:00",
+  "symbols": [
+    {
+      "symbol": "BTC-USD",
+      "name": "Bitcoin",
+      "type": "crypto"
+    },
+    {
+      "symbol": "ETH-USD",
+      "name": "Ethereum",
+      "type": "crypto"
+    },
+    {
+      "symbol": "SPY",
+      "name": "S&P 500 ETF",
+      "type": "equity"
+    },
+    {
+      "symbol": "QQQ",
+      "name": "Nasdaq 100 ETF",
+      "type": "equity"
+    }
+  ]
+}

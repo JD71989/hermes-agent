@@ -1,0 +1,77 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-08-16T22:00:00+00:00",
+  "contacts": [
+    {
+      "id": "CRM-000001",
+      "company": "Acme Corp",
+      "contact": "Jordan Smith",
+      "source": "upwork",
+      "status": "new",
+      "score": 91,
+      "fit": "high",
+      "created_at": "2026-08-17T00:45:08.521553+00:00",
+      "updated_at": "2026-08-17T05:50:24.247516+00:00",
+      "note": "posted SaaS automation RFQ"
+    },
+    {
+      "id": "CRM-000003",
+      "company": "BetaOps",
+      "contact": "Casey Reed",
+      "source": "website",
+      "status": "new",
+      "score": 53,
+      "fit": "medium",
+      "created_at": "2026-08-17T00:45:08.521553+00:00",
+      "updated_at": "2026-08-17T05:50:24.247516+00:00",
+      "note": "downloaded pricing guide"
+    },
+    {
+      "id": "CRM-000005",
+      "company": "GammaLabs",
+      "contact": "Avery Brooks",
+      "source": "referral",
+      "status": "new",
+      "score": 47,
+      "fit": "low",
+      "created_at": "2026-08-17T00:45:08.521553+00:00",
+      "updated_at": "2026-08-17T05:50:24.247516+00:00",
+      "note": "referred by existing client"
+    },
+    {
+      "id": "CRM-000007",
+      "company": "DeltaCloud",
+      "contact": "Riley Turner",
+      "source": "upwork",
+      "status": "new",
+      "score": 76,
+      "fit": "high",
+      "created_at": "2026-08-17T00:45:08.521553+00:00",
+      "updated_at": "2026-08-17T05:50:24.247516+00:00",
+      "note": "hired similar vendor last quarter"
+    },
+    {
+      "id": "CRM-000009",
+      "company": "EpsilonIO",
+      "contact": "Morgan Price",
+      "source": "cold_outreach",
+      "status": "new",
+      "score": 60,
+      "fit": "medium",
+      "created_at": "2026-08-17T00:45:08.521553+00:00",
+      "updated_at": "2026-08-17T05:50:24.247516+00:00",
+      "note": "replied to intro email"
+    }
+  ],
+  "meta": {
+    "categories": [
+      "people",
+      "companies",
+      "clients",
+      "leads",
+      "investors",
+      "upwork",
+      "partners"
+    ]
+  }
+}

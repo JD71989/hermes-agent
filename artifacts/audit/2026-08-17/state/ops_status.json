@@ -1,0 +1,19 @@
+{
+  "ts": "2026-08-17T06:12:08.644511+00:00",
+  "system": "PAOS",
+  "phase": "PHASE4",
+  "watchdog": "healthy",
+  "recovery_required": false,
+  "jobs_total": 12,
+  "jobs_recovery": {
+    "record_and_alert": 1,
+    "retry_once": 5,
+    "skip_if_missed": 6
+  },
+  "approvals": 12,
+  "queue_depth": null,
+  "blocks": [
+    "pending_approvals"
+  ],
+  "status": "BLOCKED"
+}

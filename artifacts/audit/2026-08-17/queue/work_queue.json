@@ -1,0 +1,9 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-08-16T22:00:00+00:00",
+  "queue": [],
+  "meta": {
+    "max_concurrent": 3,
+    "priority_order": ["P0", "P1", "P2", "P3"]
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "ts": "2026-08-17T05:50:24.548158+00:00",
+  "status": "ok",
+  "phase": "research",
+  "symbols_count": 4,
+  "symbols": [
+    {
+      "symbol": "BTC-USD",
+      "name": "Bitcoin",
+      "type": "crypto",
+      "status": "research_only",
+      "notes": "No execution; monitoring only until explicit user authorization and risk approval."
+    },
+    {
+      "symbol": "ETH-USD",
+      "name": "Ethereum",
+      "type": "crypto",
+      "status": "research_only",
+      "notes": "No execution; monitoring only until explicit user authorization and risk approval."
+    },
+    {
+      "symbol": "SPY",
+      "name": "S&P 500 ETF",
+      "type": "equity",
+      "status": "research_only",
+      "notes": "No execution; monitoring only until explicit user authorization and risk approval."
+    },
+    {
+      "symbol": "QQQ",
+      "name": "Nasdaq 100 ETF",
+      "type": "equity",
+      "status": "research_only",
+      "notes": "No execution; monitoring only until explicit user authorization and risk approval."
+    }
+  ],
+  "requires_approval_for_execution": true,
+  "note": "Market data/research snapshot. No trades executed."
+}

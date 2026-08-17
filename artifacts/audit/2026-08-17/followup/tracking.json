@@ -1,0 +1,159 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-08-16T22:00:00+00:00",
+  "items": [
+    {
+      "id": "FUP-000001",
+      "source": "email_triage",
+      "source_id": "a356e78b",
+      "title": "Meeting recap and next steps",
+      "from": "sender2@example.com",
+      "status": "waiting_me",
+      "due": "2026-08-22",
+      "created_at": "2026-08-16T23:14:59.158398+00:00",
+      "updated_at": "2026-08-17T03:14:10.044198+00:00",
+      "note": "Auto-created from email triage"
+    },
+    {
+      "id": "FUP-000003",
+      "source": "email_triage",
+      "source_id": "c5df94e0",
+      "title": "Newsletter: workflow tips",
+      "from": "sender7@example.com",
+      "status": "waiting_me",
+      "due": "2026-08-19",
+      "created_at": "2026-08-16T23:14:59.158398+00:00",
+      "updated_at": "2026-08-17T05:50:23.258236+00:00",
+      "note": "Auto-created from email triage"
+    },
+    {
+      "id": "FUP-000005",
+      "source": "email_triage",
+      "source_id": "ff6d8e00",
+      "title": "Client feedback on latest deliverable",
+      "from": "sender11@example.com",
+      "status": "waiting_me",
+      "due": "2026-08-22",
+      "created_at": "2026-08-16T23:14:59.158398+00:00",
+      "updated_at": "2026-08-17T03:15:53.354732+00:00",
+      "note": "Auto-created from email triage"
+    },
+    {
+      "id": "FUP-000004",
+      "source": "email_triage",
+      "source_id": "b75889ec",
+      "title": "Client feedback on latest deliverable",
+      "from": "sender1@example.com",
+      "status": "waiting_me",
+      "due": "2026-08-19",
+      "created_at": "2026-08-17T00:24:30.762616+00:00",
+      "updated_at": "2026-08-17T03:14:10.044198+00:00",
+      "note": "Auto-created from email triage"
+    },
+    {
+      "id": "FUP-000006",
+      "source": "email_triage",
+      "source_id": "308f9032",
+      "title": "Security alert: unusual sign-in",
+      "from": "sender9@example.com",
+      "status": "waiting_me",
+      "due": "2026-08-19",
+      "created_at": "2026-08-17T00:24:30.762616+00:00",
+      "updated_at": "2026-08-17T00:24:30.762616+00:00",
+      "note": "Auto-created from email triage"
+    },
+    {
+      "id": "FUP-000006",
+      "source": "email_triage",
+      "source_id": "3f08d0b4",
+      "title": "Contract renewal reminder",
+      "from": "sender4@example.com",
+      "status": "waiting_me",
+      "due": "2026-08-22",
+      "created_at": "2026-08-17T00:44:51.272304+00:00",
+      "updated_at": "2026-08-17T00:44:51.272304+00:00",
+      "note": "Auto-created from email triage"
+    },
+    {
+      "id": "FUP-000008",
+      "source": "email_triage",
+      "source_id": "5e8fdac6",
+      "title": "Lead follow-up: pricing question",
+      "from": "sender6@example.com",
+      "status": "waiting_me",
+      "due": "2026-08-22",
+      "created_at": "2026-08-17T00:44:51.272304+00:00",
+      "updated_at": "2026-08-17T03:15:53.354732+00:00",
+      "note": "Auto-created from email triage"
+    },
+    {
+      "id": "FUP-000010",
+      "source": "email_triage",
+      "source_id": "6eddfde0",
+      "title": "Invoice overdue for project Alpha",
+      "from": "sender10@example.com",
+      "status": "waiting_me",
+      "due": "2026-08-22",
+      "created_at": "2026-08-17T00:44:51.272304+00:00",
+      "updated_at": "2026-08-17T00:44:51.272304+00:00",
+      "note": "Auto-created from email triage"
+    },
+    {
+      "id": "FUP-000009",
+      "source": "email_triage",
+      "source_id": "8f52312c",
+      "title": "Promo: limited-time offer",
+      "from": "sender8@example.com",
+      "status": "waiting_me",
+      "due": "2026-08-19",
+      "created_at": "2026-08-17T00:45:08.143959+00:00",
+      "updated_at": "2026-08-17T03:15:53.354732+00:00",
+      "note": "Auto-created from email triage"
+    },
+    {
+      "id": "FUP-000010",
+      "source": "email_triage",
+      "source_id": "d7a9b6f5",
+      "title": "Support ticket status update",
+      "from": "sender5@example.com",
+      "status": "waiting_me",
+      "due": "2026-08-22",
+      "created_at": "2026-08-17T03:14:10.044198+00:00",
+      "updated_at": "2026-08-17T03:14:10.044198+00:00",
+      "note": "Auto-created from email triage"
+    },
+    {
+      "id": "FUP-000011",
+      "source": "email_triage",
+      "source_id": "929c654d",
+      "title": "Weekly ops sync notes",
+      "from": "sender3@example.com",
+      "status": "waiting_me",
+      "due": "2026-08-22",
+      "created_at": "2026-08-17T03:14:22.049283+00:00",
+      "updated_at": "2026-08-17T03:14:22.049283+00:00",
+      "note": "Auto-created from email triage"
+    },
+    {
+      "id": "FUP-000012",
+      "source": "email_triage",
+      "source_id": "99d26e72",
+      "title": "Meeting recap and next steps",
+      "from": "sender12@example.com",
+      "status": "waiting_me",
+      "due": "2026-08-22",
+      "created_at": "2026-08-17T05:50:23.258236+00:00",
+      "updated_at": "2026-08-17T05:50:23.258236+00:00",
+      "note": "Auto-created from email triage"
+    }
+  ],
+  "meta": {
+    "statuses": [
+      "waiting_me",
+      "waiting_others",
+      "follow_up_today",
+      "follow_up_later",
+      "completed"
+    ]
+  }
+}

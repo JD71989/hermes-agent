@@ -1,0 +1,20 @@
+{
+  "timestamp": "2026-08-17T05:50:24.121692+00:00",
+  "status": "ok",
+  "inbox": {
+    "triage_items": 0
+  },
+  "followups": {
+    "tracked": 0
+  },
+  "briefing": {
+    "top_actions": 10
+  },
+  "leads": {
+    "qualified": 2
+  },
+  "approvals": {
+    "pending": 9
+  },
+  "summary": "Evening review completed."
+}

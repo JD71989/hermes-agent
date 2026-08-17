@@ -1,0 +1,101 @@
+{
+  "alerts": [
+    {
+      "ts": "2026-08-16T22:07:12.027730+00:00",
+      "level": "info",
+      "summary": "no_issues",
+      "message": "",
+      "jobs_failed": []
+    },
+    {
+      "ts": "2026-08-16T23:00:51.952193+00:00",
+      "level": "info",
+      "summary": "no_issues",
+      "message": "",
+      "jobs_failed": []
+    },
+    {
+      "ts": "2026-08-17T00:00:52.773348+00:00",
+      "level": "info",
+      "summary": "no_issues",
+      "message": "",
+      "jobs_failed": []
+    },
+    {
+      "ts": "2026-08-17T01:00:54.251259+00:00",
+      "level": "info",
+      "summary": "no_issues",
+      "message": "",
+      "jobs_failed": []
+    },
+    {
+      "ts": "2026-08-17T02:00:55.918415+00:00",
+      "level": "info",
+      "summary": "no_issues",
+      "message": "",
+      "jobs_failed": []
+    },
+    {
+      "ts": "2026-08-17T02:24:10.545429+00:00",
+      "level": "info",
+      "summary": "no_issues",
+      "message": "",
+      "jobs_failed": []
+    },
+    {
+      "ts": "2026-08-17T03:00:28.247305+00:00",
+      "level": "info",
+      "summary": "no_issues",
+      "message": "",
+      "jobs_failed": []
+    },
+    {
+      "ts": "2026-08-17T03:11:07.205960+00:00",
+      "level": "warning",
+      "summary": "security_findings",
+      "message": "2 security finding(s) require action",
+      "jobs_failed": [],
+      "security_findings_count": 2
+    },
+    {
+      "ts": "2026-08-17T03:15:55.232342+00:00",
+      "level": "warning",
+      "summary": "security_findings",
+      "message": "2 security finding(s) require action",
+      "jobs_failed": [],
+      "security_findings_count": 2
+    },
+    {
+      "ts": "2026-08-17T04:10:18.527949+00:00",
+      "level": "warning",
+      "summary": "security_findings",
+      "message": "2 security finding(s) require action",
+      "jobs_failed": [],
+      "security_findings_count": 2
+    },
+    {
+      "ts": "2026-08-17T05:10:02.726028+00:00",
+      "level": "warning",
+      "summary": "security_findings",
+      "message": "2 security finding(s) require action",
+      "jobs_failed": [],
+      "security_findings_count": 2
+    },
+    {
+      "ts": "2026-08-17T05:50:25.006462+00:00",
+      "level": "warning",
+      "summary": "security_findings",
+      "message": "2 security finding(s) require action",
+      "jobs_failed": [],
+      "security_findings_count": 2
+    },
+    {
+      "ts": "2026-08-17T06:10:18.706701+00:00",
+      "level": "warning",
+      "summary": "security_findings",
+      "message": "2 security finding(s) require action",
+      "jobs_failed": [],
+      "security_findings_count": 2
+    }
+  ]
+}
