@@ -1,0 +1,8 @@
+Hermes-Agent Audit Snapshot
+Date: 2026-08-17
+Branch: master
+Head: bf77ce7bc chore: stage 2026-08-17 read-only audit artifacts
+Remote origin: https://github.com/NousResearch/hermes-agent.git
+Push status: upstream push blocked by permission on NousResearch/hermes-agent (HTTP 403 for JD71989)
+Fork: https://github.com/JD71989/hermes-agent.git
+Fork push: pushed master -> main on JD71989/hermes-agent
