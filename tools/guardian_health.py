@@ -234,6 +234,182 @@ def _run_health_check() -> Dict[str, Any]:
             }
         )
 
+    # Storage check (disk usage)
+    try:
+        import shutil
+        total, used, free = shutil.disk_usage(".")
+        free_pct = (free / total) * 100 if total > 0 else 0
+        if free_pct >= 20:
+            storage_state = "ok"
+        elif free_pct >= 10:
+            storage_state = "warn"
+        else:
+            storage_state = "error"
+            ok = False
+        storage_detail = f"Disk: {free / (1024**3):.1f} GB free of {total / (1024**3):.1f} GB total ({free_pct:.1f}% free)"
+        checks.append(
+            {
+                "subject": "storage",
+                "state": storage_state,
+                "detail": storage_detail,
+            }
+        )
+    except Exception as e:
+        checks.append(
+            {
+                "subject": "storage",
+                "state": "unavailable",
+                "detail": f"Storage check failed: {e}",
+            }
+        )
+
+    # Memory check
+    try:
+        memory_detail = ""
+        import os as _os
+        try:
+            # Try reading /proc/meminfo (Linux)
+            with open("/proc/meminfo", "r") as f:
+                meminfo = f.read()
+            total_kb = None
+            free_kb = None
+            for line in meminfo.splitlines():
+                if line.startswith("MemTotal:"):
+                    total_kb = int(line.split()[1])
+                elif line.startswith("MemAvailable:"):
+                    free_kb = int(line.split()[1])
+            if total_kb and free_kb:
+                total_mb = total_kb / 1024
+                free_mb = free_kb / 1024
+                free_pct = (free_kb / total_kb) * 100
+                memory_detail = f"Memory: {free_mb:.1f} MB free of {total_mb:.1f} MB total ({free_pct:.1f}% free)"
+                if free_pct >= 20:
+                    memory_state = "ok"
+                elif free_pct >= 10:
+                    memory_state = "warn"
+                else:
+                    memory_state = "error"
+                    ok = False
+            else:
+                raise ValueError("Could not parse meminfo")
+        except Exception:
+            # Fallback: use python internal stats
+            try:
+                import subprocess
+                result = subprocess.run(
+                    ["free", "-b"], capture_output=True, text=True, timeout=5
+                )
+                lines = result.stdout.strip().splitlines()
+                # Find the "Mem:" line
+                for line in lines:
+                    if line.startswith("Mem:"):
+                        parts = line.split()
+                        total = int(parts[1])
+                        free = int(parts[3])
+                        free_pct = (free / total) * 100 if total > 0 else 0
+                        memory_detail = f"Memory: {free / (1024**3):.2f} GB free of {total / (1024**3):.2f} GB total ({free_pct:.1f}% free)"
+                        if free_pct >= 20:
+                            memory_state = "ok"
+                        elif free_pct >= 10:
+                            memory_state = "warn"
+                        else:
+                            memory_state = "error"
+                            ok = False
+                        break
+                else:
+                    raise ValueError("Could not find Mem: line in free output")
+            except Exception:
+                checks.append(
+                    {
+                        "subject": "memory",
+                        "state": "unavailable",
+                        "detail": "Memory check unavailable",
+                    }
+                )
+                memory_state = "unavailable"
+                memory_detail = "Memory check unavailable"
+        if "memory_state" in dir():
+            checks.append(
+                {
+                    "subject": "memory",
+                    "state": memory_state,
+                    "detail": memory_detail,
+                }
+            )
+    except Exception:
+        checks.append(
+            {
+                "subject": "memory",
+                "state": "unavailable",
+                "detail": "Memory check failed",
+            }
+        )
+
+    # Process check
+    try:
+        process_detail = ""
+        try:
+            # Try /proc/entry count (Linux)
+            import os
+            proc_entries = os.listdir("/proc")
+            # Filter to numeric PIDs
+            pids = [entry for entry in proc_entries if entry.isdigit()]
+            process_count = len(pids)
+            process_detail = f"Processes: {process_count} running"
+            # State based on process count
+            if process_count >= 100:
+                process_state = "ok"
+            elif process_count >= 10:
+                process_state = "warn"
+            else:
+                process_state = "info"
+            checks.append(
+                {
+                    "subject": "process",
+                    "state": process_state,
+                    "detail": process_detail,
+                }
+            )
+        except Exception:
+            # Fallback: count current process via ps
+            try:
+                import subprocess
+                result = subprocess.run(
+                    ["ps", "-eo", "pid", "--no-headers"], capture_output=True, text=True, timeout=5
+                )
+                pids = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+                process_count = len(pids)
+                process_detail = f"Processes: {process_count} running"
+                if process_count >= 100:
+                    process_state = "ok"
+                elif process_count >= 10:
+                    process_state = "warn"
+                else:
+                    process_state = "info"
+                checks.append(
+                    {
+                        "subject": "process",
+                        "state": process_state,
+                        "detail": process_detail,
+                    }
+                )
+            except Exception:
+                checks.append(
+                    {
+                        "subject": "process",
+                        "state": "unavailable",
+                        "detail": "Process check unavailable",
+                    }
+                )
+    except Exception:
+        checks.append(
+            {
+                "subject": "process",
+                "state": "unavailable",
+                "detail": "Process check failed",
+            }
+        )
+
     result: Dict[str, Any] = {
         "ok": ok,
         "host": hostname,

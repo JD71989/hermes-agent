@@ -123,7 +123,9 @@ def test_duplicate_ack_idempotent(tmp_path):
 
     # Simulate an already-ACK'd request by persisting acked state
     from pathlib import Path
-    state_path = Path(os.environ.get("HERMES_HOME", "~/.hermes")) / "guardian_task_state.json"
+    hermes_home = Path(os.environ.get("HERMES_HOME", "~/.hermes"))
+    state_path = hermes_home / "guardian_task_state.json"
+    hermes_home.mkdir(parents=True, exist_ok=True)
     state = {"acked_requests": {"ack-test-001": True}, "completed_requests": {}}
     with open(state_path, "w", encoding="utf-8") as f:
         json.dump(state, f)
@@ -279,6 +281,102 @@ def test_no_arbitrary_command_execution():
     # No "command" or "shell" or arbitrary command fields should be accepted
     assert "command" not in props, \
         "Schema must not contain command field to prevent arbitrary execution"
+
+
+# ---------------------------------------------------------------------------
+# L. Storage check
+# ---------------------------------------------------------------------------
+
+def test_storage_check_present(tmp_path):
+    """Storage check subject appears in health check results."""
+    _set_guardian_secret()
+    hermes_home = str(tmp_path / ".hermes")
+    os.environ["HERMES_HOME"] = hermes_home
+
+    for mod in list(sys.modules.keys()):
+        if "guardian_health" in mod:
+            del sys.modules[mod]
+    import tools.guardian_health
+
+    result = _run_tool({"type": "SYSTEM_HEALTH_CHECK", "requestId": "storage-test-001"})
+    assert "ok" in result, "Health check should succeed"
+    subjects = [c.get("subject") for c in result.get("checks", [])]
+    assert "storage" in subjects, \
+        "Storage check subject should appear in checks"
+
+    # Verify state persistence
+    from pathlib import Path
+    state_path = Path(os.environ.get("HERMES_HOME", "~/.hermes")) / "guardian_task_state.json"
+    state = {}
+    if state_path.exists():
+        with open(state_path, "r", encoding="utf-8") as f:
+            state = json.load(f)
+    assert "storage-test-001" in state.get("completed_requests", {}), \
+        "Storage execution should be persisted as completed"
+
+
+# ---------------------------------------------------------------------------
+# M. Memory check
+# ---------------------------------------------------------------------------
+
+def test_memory_check_present(tmp_path):
+    """Memory check subject appears in health check results."""
+    _set_guardian_secret()
+    hermes_home = str(tmp_path / ".hermes")
+    os.environ["HERMES_HOME"] = hermes_home
+
+    for mod in list(sys.modules.keys()):
+        if "guardian_health" in mod:
+            del sys.modules[mod]
+    import tools.guardian_health
+
+    result = _run_tool({"type": "SYSTEM_HEALTH_CHECK", "requestId": "memory-test-001"})
+    assert "ok" in result, "Health check should succeed"
+    subjects = [c.get("subject") for c in result.get("checks", [])]
+    assert "memory" in subjects, \
+        "Memory check subject should appear in checks"
+
+    # Verify state persistence
+    from pathlib import Path
+    state_path = Path(os.environ.get("HERMES_HOME", "~/.hermes")) / "guardian_task_state.json"
+    state = {}
+    if state_path.exists():
+        with open(state_path, "r", encoding="utf-8") as f:
+            state = json.load(f)
+    assert "memory-test-001" in state.get("completed_requests", {}), \
+        "Memory execution should be persisted as completed"
+
+
+# ---------------------------------------------------------------------------
+# N. Process check
+# ---------------------------------------------------------------------------
+
+def test_process_check_present(tmp_path):
+    """Process check subject appears in health check results."""
+    _set_guardian_secret()
+    hermes_home = str(tmp_path / ".hermes")
+    os.environ["HERMES_HOME"] = hermes_home
+
+    for mod in list(sys.modules.keys()):
+        if "guardian_health" in mod:
+            del sys.modules[mod]
+    import tools.guardian_health
+
+    result = _run_tool({"type": "SYSTEM_HEALTH_CHECK", "requestId": "process-test-001"})
+    assert "ok" in result, "Health check should succeed"
+    subjects = [c.get("subject") for c in result.get("checks", [])]
+    assert "process" in subjects, \
+        "Process check subject should appear in checks"
+
+    # Verify state persistence
+    from pathlib import Path
+    state_path = Path(os.environ.get("HERMES_HOME", "~/.hermes")) / "guardian_task_state.json"
+    state = {}
+    if state_path.exists():
+        with open(state_path, "r", encoding="utf-8") as f:
+            state = json.load(f)
+    assert "process-test-001" in state.get("completed_requests", {}), \
+        "Process execution should be persisted as completed"
 
 
 # ---------------------------------------------------------------------------
