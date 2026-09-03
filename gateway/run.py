@@ -66,6 +66,7 @@ from agent.turn_context import (
 )
 from hermes_cli.config import _is_ssh_remote_tilde_cwd, cfg_get
 from hermes_cli.fallback_config import get_fallback_chain
+from tools.guardian_health import handle_guardian_health_check
 
 # --- Agent cache tuning ---------------------------------------------------
 # Bounds the per-session AIAgent cache to prevent unbounded growth in
@@ -12850,6 +12851,14 @@ class GatewayRunner(GatewayAuthorizationMixin, GatewayKanbanWatchersMixin, Gatew
         # engages drain on the first tick.
         self._spawn_supervised(self._drain_control_watcher, "drain_control_watcher")
 
+        # Start background guardian polling watcher — polls the Guardian command
+        # endpoint and automatically processes SYSTEM_HEALTH_CHECK commands
+        # through the existing guardian_health handler.
+        self._spawn_supervised(
+            self._guardian_polling_watcher,
+            "guardian_polling_watcher",
+        )
+
         logger.info("Press Ctrl+C to stop")
         
         return True
@@ -12864,6 +12873,171 @@ class GatewayRunner(GatewayAuthorizationMixin, GatewayKanbanWatchersMixin, Gatew
     # be permanently abandoned (NS: silent loss of platform-reconnect / kanban /
     # handoff for the rest of the process life).
     _SUPERVISED_HEALTHY_SECS = 300
+
+    async def _guardian_polling_watcher(self) -> None:
+        """Background watcher that polls the Guardian command endpoint.
+
+        Polls ``/api/public/hermes-commands`` at a configured interval
+        (``guardian.poll_interval_seconds`` from config.yaml, default 30s).
+        When ``SYSTEM_HEALTH_CHECK`` commands are returned, invokes the
+        existing ``handle_guardian_health_check`` handler and submits the
+        result back to Guardian via ACK.
+
+        Handles transient network/Guardian failures with exponential backoff.
+        Relies on ``handle_guardian_health_check``'s built-in persistence
+        (via ``HERMES_HOME/guardian_task_state.json``) for idempotency —
+        duplicate deliveries of the same ``requestId`` are automatically
+        deduplicated by the handler's internal state management.
+
+        Shuts down cleanly when ``self._running`` becomes False.
+        """
+        import json
+        import os as _os
+        from datetime import datetime
+
+        # Polling interval (configurable via config.yaml)
+        try:
+            from hermes_cli.config import load_config as _load_full_config
+            _gw_cfg = _load_full_config().get("guardian") or {}
+            poll_interval = float(_gw_cfg.get("poll_interval_seconds", 30))
+        except Exception:
+            poll_interval = 30.0
+
+        # Guardian endpoint base URL (configurable)
+        try:
+            _gw_base = str(_gw_cfg.get("endpoint", "")).strip()
+            if not _gw_base:
+                from hermes_cli.config import load_config as _load_cfgs
+                _gw_cfg2 = _load_cfgs().get("guardian") or {}
+                _gw_base = str(_gw_cfg2.get("endpoint", "")).strip()
+            if not _gw_base:
+                _gw_base = ""
+        except Exception:
+            _gw_base = ""
+
+        secret = _os.getenv("GUARDIAN_HERMES_SECRET", "")
+        base_url = (_gw_base + "/api/public/hermes-commands") if _gw_base else ""
+
+        backoff = 1.0
+        max_backoff = 300.0
+        jitter = 0.5
+
+        logger.info(
+            "Guardian polling watcher starting (interval=%.1fs, endpoint=%s)",
+            poll_interval,
+            base_url or "not configured",
+        )
+
+        while self._running:
+            try:
+                # Build request headers with auth secret
+                headers: Dict[str, str] = {}
+                if secret:
+                    headers["Authorization"] = f"Bearer {secret}"
+
+                # Poll the Guardian command endpoint
+                import httpx
+                if not base_url:
+                    logger.debug("Guardian endpoint not configured; skipping poll")
+                    await asyncio.sleep(poll_interval)
+                    continue
+
+                logger.debug("Polling Guardian commands endpoint: %s", base_url)
+                response = await httpx.AsyncClient().get(
+                    base_url, headers=headers, timeout=20.0,
+                )
+
+                if response.status_code != 200:
+                    logger.warning(
+                        "Guardian commands endpoint returned %d: %s",
+                        response.status_code,
+                        response.text[:200] if response.text else "",
+                    )
+                    backoff = min(max_backoff, backoff * 2)
+                    await asyncio.sleep(poll_interval + backoff * jitter)
+                    continue
+
+                data = response.json()
+                commands = data.get("commands", []) if isinstance(data, dict) else []
+
+                for cmd in commands:
+                    cmd_type = cmd.get("type", "")
+                    request_id = cmd.get("requestId", "")
+
+                    if cmd_type == "SYSTEM_HEALTH_CHECK" and request_id:
+                        # Invoke the existing guardian_health handler.
+                        # The handler has built-in idempotency: it persists state
+                        # to HERMES_HOME/guardian_task_state.json and returns
+                        # {"ok": True, "already_acked": True} for duplicate
+                        # deliveries, or the actual result for new requests.
+                        try:
+                            handler_args = {"type": "SYSTEM_HEALTH_CHECK", "requestId": request_id}
+                            raw_result = handle_guardian_health_check(handler_args)
+                            result = json.loads(raw_result)
+
+                            # If the handler returned already_acked, skip submission
+                            # (the result was already ACK'd in a previous cycle).
+                            if result.get("already_acked"):
+                                logger.debug(
+                                    "Guardian request %s already ACK'd, skipping resubmission",
+                                    request_id,
+                                )
+                                continue
+
+                            # Submit the result back to Guardian
+                            submit_payload = {
+                                "type": "SYSTEM_HEALTH_CHECK_RESULT",
+                                "requestId": request_id,
+                                "result": result,
+                                "submittedAt": datetime.utcnow().isoformat() + "Z",
+                            }
+                            try:
+                                submit_resp = await httpx.AsyncClient().post(
+                                    base_url,
+                                    json=submit_payload,
+                                    headers=headers,
+                                    timeout=30.0,
+                                )
+                                if submit_resp.status_code == 200:
+                                    logger.info(
+                                        "Submitted guardian health check result for %s",
+                                        request_id,
+                                    )
+                                else:
+                                    logger.warning(
+                                        "Guardian result submission returned %d: %s",
+                                        submit_resp.status_code,
+                                        submit_resp.text[:200] if submit_resp.text else "",
+                                    )
+                            except Exception as submit_e:
+                                logger.error(
+                                    "Guardian result submission failed for %s: %s",
+                                    request_id,
+                                    submit_e,
+                                    exc_info=True,
+                                )
+                        except Exception as handler_e:
+                            logger.error(
+                                "Guardian health check handler failed for %s: %s",
+                                request_id,
+                                handler_e,
+                                exc_info=True,
+                            )
+
+                # Reset backoff after a successful poll cycle
+                backoff = 1.0
+
+                # Wait before next poll
+                sleep_time = min(poll_interval, max_backoff)
+                await asyncio.sleep(sleep_time)
+
+            except asyncio.CancelledError:
+                logger.info("Guardian polling watcher cancelled")
+                raise
+            except Exception as e:
+                logger.error("Guardian polling watcher unexpected error: %s", e, exc_info=True)
+                backoff = min(max_backoff, backoff * 2)
+                await asyncio.sleep(poll_interval + backoff * jitter)
 
     def _spawn_supervised(self, coro_factory, name, *, restart=True, _attempt=0, on_spawn=None):
         """Launch a long-lived background task with task-level supervision.
