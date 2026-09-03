@@ -14,7 +14,7 @@ os.chdir("C:\\Users\\jamie\\AppData\\Local\\hermes\\hermes-agent")
 
 
 # ---------------------------------------------------------------------------
-# Helpers: set/clear env vars and ensure tool is available
+# Helpers
 # ---------------------------------------------------------------------------
 
 def _set_guardian_secret():
@@ -257,20 +257,42 @@ def test_unsupported_task_type_rejected():
     # Ensure tool is available
     _ensure_guardian_tool()
 
-    result = _run_tool({"type": "OTHER_TASK_TYPE", "requestIdempotent behavior)
-   3. When I set `GUId=test": "type-test-0`001"})
-    # Should target result.get("ok") is False or "error" in result or "Unsupported" in json.dumps(result)
+    result = _run_tool({"type": "OTHER_TASK_TYPE", "requestId": "type-test-001"})
+    # Should reject the unsupported type
     assert result.get("ok") is False or "error" in result or "Unsupported" in json.dumps(result)
 
 
 # ---------------------------------------------------------------------------
-# J. No arbitrary command-string-indent">t to "test-secret", the test passes
-- But I also need to verify that this works with the existing Guardian config
+# J. No arbitrary command-string execution
+# ---------------------------------------------------------------------------
 
-The test setup and the actual implementation align properly, with the tool being properly registered and the handler accepting `args` and `**kw` parameters as required by the framework. The state management correctly handles both the initial execution and subsequent duplicate checks, and the idempotency guard prevents duplicate processing across different scenarios.
+def test_no_arbitrary_command_execution():
+    """The handler must NOT accept or execute arbitrary shell commands from Guardian."""
+    _set_guardian_secret()
 
-The only remaining concern is the 401 authentication issue, which is a separate Guardian-side configuration matter that requires updating server-side secrets—something I'm not authorized to modify. All the Hermes-side implementation is complete and functioning as intended.
-<tool_call>
-<function=todowrite>
-<parameter=todos>
-[{"priority": "high", "content": "Create tools/guardian_health.py - the SYSTEM_HEALTH_CHECK polling and execution tool", "status": "completed"}, {"priority": "high", "content": "Register the tool via registry.register() (auto-discovered on import)", "status": "completed"}, {"priority": "high", "content": "Create focused unit tests for the new tool", "status": "completed"}, {"priority": "high", "content": "Run tests and verify implementation", "status": "completed"}, {"priority": "medium", "content": "Run E2E if authentication permits", "status": "pending"}]
+    entry = _ensure_guardian_tool()
+    # The schema should only have type and requestId properties
+    schema = entry.schema
+    props = schema.get("properties", {})
+    assert "type" in props, "Schema should have type property"
+    assert "requestId" in props, "Schema should have requestId property"
+    # No "command" or "shell" or arbitrary command fields should be accepted
+    assert "command" not in props, \
+        "Schema must not contain command field to prevent arbitrary execution"
+
+
+# ---------------------------------------------------------------------------
+# K. Existing telemetry remains compatible
+# ---------------------------------------------------------------------------
+
+def test_telemetry_compatibility():
+    """The tool does not interfere with existing telemetry infrastructure."""
+    _set_guardian_secret()
+
+    entry = _ensure_guardian_tool()
+    # The tool should have a check_fn that doesn't break other tools
+    assert callable(entry.check_fn)
+    # Verify handler returns a string (JSON) as expected by the registry
+    raw_result = entry.handler({"type": "SYSTEM_HEALTH_CHECK", "requestId": "telemetry-test"})
+    assert isinstance(raw_result, str), \
+        "Handler must return a JSON string result"
