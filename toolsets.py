@@ -180,6 +180,18 @@ TOOLSETS = {
         "includes": []
     },
 
+    "bond": {
+        "description": (
+            "Bond revenue and lead pipeline - traffic to revenue with UK/AU support. "
+            "Pipeline stages: create_enquiry, validate_lead, qualify_lead, "
+            "deduplicate, accept_lead, reject_lead, deliver_lead, "
+            "accept_customer, record_revenue, record_feedback, optimise. "
+            "£35 per accepted qualified lead. Requires BOND_API_KEY env var."
+        ),
+        "tools": ["bond_revenue"],
+        "includes": []
+    },
+
     "computer_use": {
         "description": (
             "Background desktop control via cua-driver (macOS/Windows/Linux) — "
