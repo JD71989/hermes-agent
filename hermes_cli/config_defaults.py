@@ -7,7 +7,9 @@ verbatim from hermes_cli/config.py. Must not import from hermes_cli.config.
 DEFAULT_CONFIG = {
     "model": "",
     "providers": {},
-    "fallback_providers": [],
+    "fallback_providers": [
+        {"provider": "openrouter", "model": "anthropic/claude-sonnet-4.6"}
+    ],
     "credential_pool_strategies": {},
     "toolsets": ["hermes-cli"],
     # SQLite journal mode used by every Hermes database opener. WAL is the
