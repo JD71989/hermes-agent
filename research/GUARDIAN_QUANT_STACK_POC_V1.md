@@ -2,79 +2,83 @@
 
 ## Objective
 
-Compare the Guardian-native research path with current upstream approaches before
-making any external dependency decision.
+Evaluate VectorBT and NautilusTrader against Guardian's current research/replay
+architecture without changing the production runtime or installing external
+dependencies into the base Python environment.
 
-## External projects checked
+## Isolation
 
-VectorBT 1.1.0, NautilusTrader 1.231.0/2.x transition, OpenAlice AutoQuant,
-and Microsoft RD-Agent(Q).
+External packages were exercised only inside `.quant_poc_venv`, a local
+research environment. Guardian production code does not import either package.
 
-## VectorBT isolated test
+Installed versions in the PoC environment:
+- vectorbt 1.1.0
+- nautilus_trader 1.231.0
+- py-clob-client-v2 1.1.0 for the Nautilus Polymarket adapter smoke test
 
-A dedicated virtual environment was used; the Guardian repository dependency set
-was not changed.
+## VectorBT comparison
 
-VectorBT 1.1.0 imported successfully after pinning Plotly to 6.9.0. The unbounded
-upstream Plotly dependency currently resolves Plotly 7.x on this environment, and
-that combination failed at import because VectorBT 1.1.0 still registers the
-legacy Plotly scattermapbox template property.
+Workload:
+- 5,000 synthetic daily price points
+- 1,711 valid fast/slow SMA combinations (windows 2..60)
+- all-in long-only signal semantics
+- next-bar/close timing aligned between engines
+- no fees for numerical conformance
 
-The compatibility issue is isolated to the PoC environment and was not patched
-into Guardian itself.
+Guardian-native result:
+- 1,711 combinations in 0.7545 seconds
 
-The same 5,000-bar synthetic SMA workload was run through both engines.
-## Comparable results
+VectorBT result:
+- 1,711 portfolio configurations in 7.6673 seconds
 
-Guardian-native: 1,711 valid SMA pairs, 0.9856 seconds.
+The workload-specific runtime ratio was about 10.16x in favor of the
+Guardian-native sweep. This is not a general claim that Guardian is faster than
+VectorBT: VectorBT was running a full portfolio simulation over the parameter
+matrix while the native harness computes aggregate strategy metrics.
 
-VectorBT: 1,711 SMA pairs, 34.6502 seconds on the same Nitro5 run.
+Numerical conformance on the 6/22 strategy:
+- total return delta: 5.6e-15
+- max drawdown delta: 1.0e-15
+- trade/order count: identical at 255 when counting order-side changes
+- Sharpe differed because annualization conventions were different; this is
+  not treated as a numerical defect.
 
-Single pair (6,22), same synthetic series and nominal 10 bps fee:
-Guardian total return 0.6571835, max drawdown -0.2787486, Sharpe 0.2572690.
-VectorBT total return 0.6568887, max drawdown -0.2787229, Sharpe 0.3090978.
+A 10 bps fee comparison differed slightly because the native benchmark applies
+a vectorized cost deduction while VectorBT applies portfolio-level execution
+fees. Fee accounting should remain governed by Guardian's dedicated economics
+model rather than using this sweep kernel as the final execution model.
 
-Returns and drawdown are close, but trade-count/Sharpe semantics differ because
-the two implementations model signal changes and performance statistics
-differently. This is a semantic-comparison item, not a claim that one engine is
-economically superior.
+## NautilusTrader compatibility
 
-The Guardian result is roughly 35x faster in this specific laptop microbenchmark.
-This result is not a universal performance claim and should be repeated across
-larger workloads and real datasets.
+Verified:
+- NautilusTrader 1.231.0 imports on Python 3.13.15 / Windows x64.
+- BacktestEngine can be instantiated and disposed successfully.
+- The optional Polymarket adapter initially failed because `py-clob-client-v2`
+  was an undeclared base dependency. Installing the documented optional client
+  dependency in the isolated PoC environment made the Polymarket adapter import
+  successfully.
+- Available Polymarket components include data and execution client factories.
 
-## NautilusTrader isolated test
-
-NautilusTrader 1.231.0 installed on Windows/Python 3.13 and its v1 engine imported
-from the backtest.engine module. BacktestEngine() initialized successfully in
-about 1.1 seconds and exposes event-driven data/instrument/venue/strategy/run
-components.
-
-Current upstream documentation is for NautilusTrader 2.x and uses a different
-Python API. The current stable 1.231.0 package cannot use the 2.x import path for
-BacktestEngine. A separate 2.0.0rc3 wheel download was attempted for a clean PoC
-but the connection was interrupted before completion.
+Not yet proven:
+- Guardian event-by-event replay equivalence against a real Nautilus backtest.
+- Full Pump.fun adapter compatibility.
+- Performance of Nautilus against Guardian on the same event stream.
 
 ## Decision
 
-Do not add VectorBT or NautilusTrader as Guardian runtime dependencies yet.
-Use VectorBT as a benchmark/reference for vectorized research design.
+Do not replace Guardian's current research engine with VectorBT or NautilusTrader.
 
-Run a dedicated Nautilus 2.x PoC later, after the 2.x wheel can be obtained
-cleanly, and compare it against Guardian's event/replay semantics rather than
-rewriting Guardian around it.
+Use the results as follows:
+- VectorBT: reference implementation and optional external research comparator.
+- NautilusTrader: isolated integration candidate, especially for event-driven
+  simulation and future venue adapters.
+- Guardian native engine: keep as the current canonical research path.
 
-Keep RD-Agent(Q) as a research-loop reference until an isolated experiment shows
-incremental value.
+## Next PoC
 
-Keep OpenAlice as an orchestration/provenance reference; do not vendor its
-AGPL-3.0-only code into Guardian.
+Build a minimal Nautilus event-replay study using the same Guardian synthetic
+event stream and compare ordering, timestamps, fills, portfolio state and
+determinism. Only after that comparison should any deeper integration be
+considered.
 
-No live execution was enabled or tested.
-
-## Sources
-
-- VectorBT upstream README and pyproject.toml.
-- NautilusTrader upstream installation/quickstart and current repository.
-- OpenAlice upstream README and AutoQuant delegation skill.
-- Microsoft RD-Agent upstream finance quant documentation.
+Live execution remains locked.

@@ -67,10 +67,11 @@ def vectorized_sma_sweep(
     signal = fast_ma[:, None, :] > slow_ma[None, :, :]
     signal = np.where(np.isnan(fast_ma[:, None, :]) | np.isnan(slow_ma[None, :, :]),
                       False, signal)
-    position = np.zeros_like(signal, dtype=float)
-    position[:, :, 1:] = signal[:, :, :-1]
-    turnover = np.abs(np.diff(position, axis=2, prepend=0.0))
-    net_returns = position * returns
+    held = np.zeros_like(signal, dtype=float)
+    held[:, :, :-1] = signal[:, :, :-1]
+    turnover = np.abs(np.diff(signal.astype(float), axis=2, prepend=0.0))
+    net_returns = np.zeros_like(signal, dtype=float)
+    net_returns[:, :, 1:] = held[:, :, :-1] * returns[1:]
     if fee_bps:
         net_returns -= turnover * (fee_bps / 10_000.0)
     total = np.prod(1.0 + net_returns, axis=2) - 1.0
