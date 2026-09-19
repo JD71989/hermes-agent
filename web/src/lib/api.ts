@@ -2332,6 +2332,10 @@ export interface GuardianWorkflowStep {
   started_at?: string | null;
   finished_at?: string | null;
   error?: string | null;
+  executor?: "native" | "agent" | string | null;
+  result_json?: string | null;
+  result_summary?: string | null;
+  blocker?: string | null;
 }
 
 export interface GuardianWorkflowEvent {
@@ -2346,7 +2350,7 @@ export interface GuardianWorkflow {
   name: string;
   mission: string;
   profile: string;
-  state: "queued" | "running" | "paused" | "completed" | "failed" | "canceled" | string;
+  state: "queued" | "running" | "paused" | "blocked" | "completed" | "failed" | "canceled" | string;
   current_step: number;
   created_at: string;
   updated_at: string;

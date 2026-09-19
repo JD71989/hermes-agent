@@ -354,12 +354,12 @@ function Automation({jobs,workflows,busy,onRun,onWorkflowAction}:{jobs:CronJob[]
           const done = w.steps?.filter(s=>s.status==="completed").length ?? 0;
           const total = w.steps?.length ?? 0;
           const pct = total ? Math.round((done/total)*100) : 0;
-          const action = w.state==="paused" ? "resume" : w.state==="failed" ? "retry" : w.state==="running" ? "pause" : null;
+          const action = w.state==="paused" ? "resume" : (w.state==="failed" || w.state==="blocked") ? "retry" : w.state==="running" ? "pause" : null;
           return <div className="g-job" key={w.id}>
             <div>
               <b>{w.name}</b>
-              <small>{w.engine.toUpperCase()} · {current?.name ?? "DONE"} · {done}/{total} stages · {pct}%</small>
-              <code>{w.id} · {w.state.toUpperCase()}{w.last_error ? " · " + w.last_error.slice(0,90) : ""}</code>
+              <small>{w.engine.toUpperCase()} · {current?.name ?? "DONE"} · {done}/{total} stages · {pct}% · {(current?.executor ?? "pending").toUpperCase()}</small>
+              <code>{w.id} · {w.state.toUpperCase()}{current?.result_summary ? " · " + current.result_summary.slice(0,110) : ""}{current?.blocker ? " · BLOCKER: " + current.blocker : ""}</code>
             </div>
             <div className="g-job-side">
               <State text={w.state.toUpperCase()} good={w.state==="running"||w.state==="completed"}/>

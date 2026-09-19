@@ -129,6 +129,10 @@ def _db() -> sqlite3.Connection:
       started_at TEXT,
       finished_at TEXT,
       error TEXT,
+      executor TEXT,
+      result_json TEXT,
+      result_summary TEXT,
+      blocker TEXT,
       UNIQUE(workflow_id, step_index)
     );
     CREATE TABLE IF NOT EXISTS workflow_events (
@@ -141,6 +145,16 @@ def _db() -> sqlite3.Connection:
     CREATE INDEX IF NOT EXISTS idx_workflows_state ON workflows(state, updated_at);
     CREATE INDEX IF NOT EXISTS idx_workflow_steps_workflow ON workflow_steps(workflow_id, step_index);
     """)
+    for column, definition in (
+        ("executor", "executor TEXT"),
+        ("result_json", "result_json TEXT"),
+        ("result_summary", "result_summary TEXT"),
+        ("blocker", "blocker TEXT"),
+    ):
+        existing = {str(r[1]) for r in conn.execute("PRAGMA table_info(workflow_steps)").fetchall()}
+        if column not in existing:
+            conn.execute(f"ALTER TABLE workflow_steps ADD COLUMN {definition}")
+    conn.commit()
     return conn
 
 def create_workflow(*, engine: str, name: str, mission: str, profile: str) -> dict[str, Any]:
@@ -242,9 +256,9 @@ def set_workflow(*, workflow_id: str, state: str | None = None, current_step: in
         finally:
             conn.close()
 
-def set_step(*, workflow_id: str, step_index: int, status: str | None = None, cron_job_id: str | None = None, execution_id: str | None = None, retry_count: int | None = None, started_at: str | None = None, finished_at: str | None = None, error: str | None = None) -> None:
+def set_step(*, workflow_id: str, step_index: int, status: str | None = None, cron_job_id: str | None = None, execution_id: str | None = None, retry_count: int | None = None, started_at: str | None = None, finished_at: str | None = None, error: str | None = None, executor: str | None = None, result_json: str | None = None, result_summary: str | None = None, blocker: str | None = None) -> None:
     changes = []; params: list[Any] = []
-    for key, value in (("status", status), ("cron_job_id", cron_job_id), ("execution_id", execution_id), ("retry_count", retry_count), ("started_at", started_at), ("finished_at", finished_at), ("error", error)):
+    for key, value in (("status", status), ("cron_job_id", cron_job_id), ("execution_id", execution_id), ("retry_count", retry_count), ("started_at", started_at), ("finished_at", finished_at), ("error", error), ("executor", executor), ("result_json", result_json), ("result_summary", result_summary), ("blocker", blocker)):
         if value is not None:
             changes.append(f"{key}=?"); params.append(value)
     if not changes:
@@ -270,6 +284,20 @@ def add_event(workflow_id: str, event_type: str, message: str) -> None:
             conn.commit()
         finally:
             conn.close()
+
+def ensure_runner_script() -> str:
+    """Install the tiny cron entrypoint used to launch native Guardian stages."""
+    script_dir = get_hermes_home().resolve() / "scripts"
+    script_dir.mkdir(parents=True, exist_ok=True)
+    path = script_dir / "guardian_workflow_stage.py"
+    content = (
+        "from agent.guardian.stage_runner import main\n"
+        "raise SystemExit(main())\n"
+    )
+    if not path.exists() or path.read_text(encoding="utf-8") != content:
+        path.write_text(content, encoding="utf-8")
+    return str(path)
+
 
 def get_current_step(workflow_id: str) -> dict[str, Any] | None:
     workflow = get_workflow(workflow_id)

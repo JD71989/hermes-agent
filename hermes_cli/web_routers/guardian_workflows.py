@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import threading
 import time
+from pathlib import Path
 from typing import Any, Optional
 
 from fastapi import APIRouter, HTTPException
@@ -31,6 +32,19 @@ def _step_name(workflow: dict[str, Any]) -> str:
     step = store.get_current_step(workflow["id"])
     return str(step["name"]) if step else "UNKNOWN"
 
+def _ensure_profile_runner(profile: str) -> str:
+    profile_name, profile_home = _cron_profile_home(profile)
+    scripts_dir = Path(profile_home) / "scripts"
+    scripts_dir.mkdir(parents=True, exist_ok=True)
+    runner = scripts_dir / "guardian_workflow_stage.py"
+    content = (
+        "from agent.guardian.stage_runner import main\n"
+        "raise SystemExit(main())\n"
+    )
+    if not runner.exists() or runner.read_text(encoding="utf-8") != content:
+        runner.write_text(content, encoding="utf-8")
+    return str(runner)
+
 def _start_current_step(workflow: dict[str, Any]) -> dict[str, Any] | None:
     step = store.get_current_step(workflow["id"])
     if not step:
@@ -38,42 +52,62 @@ def _start_current_step(workflow: dict[str, Any]) -> dict[str, Any] | None:
         store.add_event(workflow["id"], "completed", "Workflow completed.")
         return store.get_workflow(workflow["id"])
     existing = step.get("cron_job_id")
-    if existing and step.get("status") in {"running", "completed"}:
+    if existing and step.get("status") in {"queued", "running", "completed", "blocked", "failed"}:
         return store.get_workflow(workflow["id"])
     profile = str(workflow.get("profile") or "default")
-    job = _call_cron_for_profile(
-        profile,
-        "create_job",
-        name=f"Guardian · {workflow['name']} · {step['name']}",
-        prompt=step["prompt"],
-        schedule="in 1m",
-        deliver="local",
-        paused=True,
-        paused_reason="Guardian workflow controller owns execution.",
-    )
+    agent_mode = str(workflow.get("engine") or "").lower() == "general"
+    job_kwargs: dict[str, Any] = {
+        "name": f"Guardian {'Agent' if agent_mode else 'Native'} · {workflow['name']} · {step['name']}",
+        "prompt": step["prompt"] if agent_mode else "",
+        "schedule": "in 1m",
+        "deliver": "local",
+        "paused": True,
+        "paused_reason": "Guardian workflow controller owns execution.",
+    }
+    if agent_mode:
+        job_kwargs["no_agent"] = False
+    else:
+        _ensure_profile_runner(profile)
+        job_kwargs.update({
+            "script": "guardian_workflow_stage.py",
+            "no_agent": True,
+            "workdir": str(Path(store.__file__).resolve().parents[2]),
+            "paused_reason": "Guardian workflow controller owns native-stage execution.",
+        })
+    job = _call_cron_for_profile(profile, "create_job", **job_kwargs)
     job_id = str(job["id"])
+    idx = int(step["step_index"])
+    executor_name = "agent" if agent_mode else "native"
     store.set_step(
         workflow_id=workflow["id"],
-        step_index=int(step["step_index"]),
+        step_index=idx,
         status="queued",
         cron_job_id=job_id,
         error="",
+        executor=executor_name,
+        result_json="",
+        result_summary="",
+        blocker="",
     )
     store.set_workflow(workflow_id=workflow["id"], state="running", last_error="")
-    store.add_event(workflow["id"], "dispatch", f"Dispatching stage {step['name']} via {job_id}.")
+    store.add_event(workflow["id"], "dispatch", f"Dispatching native stage {step['name']} via {job_id}.")
     ran = _fire_cron_job_for_profile(profile, job_id, force=True)
     if not ran:
-        raise RuntimeError(f"Guardian stage {step['name']} could not be claimed.")
+        raise RuntimeError(f"Guardian native stage {step['name']} could not be claimed.")
     execution = latest_execution(job_id)
+    latest = store.get_current_step(workflow["id"]) or {}
     if execution:
+        latest_status = str(latest.get("status") or "queued")
+        preserved_terminal = latest_status in {"completed", "blocked", "failed"}
         store.set_step(
             workflow_id=workflow["id"],
-            step_index=int(step["step_index"]),
-            status="running",
+            step_index=idx,
+            status=latest_status if preserved_terminal else ("running" if execution.get("status") in {"claimed", "running"} else latest_status),
             execution_id=str(execution["id"]),
             started_at=str(execution.get("started_at") or execution.get("claimed_at") or ""),
         )
-        store.add_event(workflow["id"], "running", f"Stage {step['name']} is running.")
+        if not preserved_terminal:
+            store.add_event(workflow["id"], "running", f"Native stage {step['name']} is running.")
     return store.get_workflow(workflow["id"])
 
 def _reconcile_one(workflow: dict[str, Any]) -> dict[str, Any] | None:
@@ -99,6 +133,20 @@ def _reconcile_one(workflow: dict[str, Any]) -> dict[str, Any] | None:
     if execution is None:
         return workflow
     status = str(execution.get("status") or "")
+    step_status = str(step.get("status") or "")
+    if step_status == "blocked":
+        blocker = str(step.get("blocker") or "NATIVE_EXECUTOR_BLOCKED")
+        message = str(step.get("result_summary") or "Native executor blocked this stage.")
+        if workflow.get("state") != "blocked":
+            store.set_workflow(workflow_id=workflow["id"], state="blocked", last_error=blocker)
+            store.add_event(workflow["id"], "blocked", f"Stage {step['name']} blocked: {message[:500]}")
+        return store.get_workflow(workflow["id"])
+    if step_status == "failed":
+        error = str(step.get("error") or "Native stage failed.")
+        if workflow.get("state") != "failed":
+            store.set_workflow(workflow_id=workflow["id"], state="failed", last_error=error)
+            store.add_event(workflow["id"], "failed", f"Stage {step['name']} failed: {error[:500]}")
+        return store.get_workflow(workflow["id"])
     if status in {"claimed", "running"}:
         if step.get("status") != "running":
             store.set_step(
@@ -263,8 +311,8 @@ async def retry_workflow(workflow_id: str):
     if not workflow:
         raise HTTPException(status_code=404, detail="Workflow not found")
     step = store.get_current_step(workflow_id)
-    if not step or step.get("status") != "failed":
-        raise HTTPException(status_code=409, detail="Only a failed current stage can be retried.")
+    if not step or step.get("status") not in {"failed", "blocked"}:
+        raise HTTPException(status_code=409, detail="Only a failed or blocked current stage can be retried.")
     count = int(step.get("retry_count") or 0) + 1
     await asyncio.to_thread(
         store.set_step,
