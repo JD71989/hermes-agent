@@ -98,6 +98,7 @@ const SystemPage = lazy(() => import("@/pages/SystemPage"));
 const ChatPage = lazy(() => import("@/pages/ChatPage"));
 const GuardianCommandPage = lazy(() => import("@/pages/GuardianCommandPage"));
 const GuardianArchitecturePage = lazy(() => import("@/pages/GuardianArchitecturePage"));
+const GuardianIdeaLabPage = lazy(() => import("@/pages/GuardianIdeaLabPage"));
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useI18n } from "@/i18n";
@@ -161,6 +162,7 @@ const BUILTIN_ROUTES_CORE: Record<string, ComponentType> = {
   "/guardian": GuardianCommandPage,
   "/guardian/department/:id": () => <GuardianArchitecturePage />,
   "/guardian/business/:id": () => <GuardianArchitecturePage />,
+  "/guardian/ideas": GuardianIdeaLabPage,
   "/sessions": SessionsPage,
   "/files": FilesPage,
   "/analytics": AnalyticsPage,
