@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Copy, Eye, EyeOff, KeyRound, LockKeyhole, Plus, RefreshCw, ShieldCheck, Trash2, Unlock } from "lucide-react";
-import { api, type GuardianVaultAuditRow, type GuardianVaultCredential, type GuardianVaultStatus, type GuardianVaultWithdrawn } from "@/lib/api";
+import { Copy, Eye, EyeOff, KeyRound, LockKeyhole, Plus, RefreshCw, ShieldCheck, Trash2, Unlock, WalletCards, UserRound } from "lucide-react";
+import { api, type GuardianVaultAuditRow, type GuardianVaultCredential, type GuardianVaultStatus, type GuardianVaultWithdrawn, type GuardianWallet, type GuardianWalletCreated, type GuardianWalletWithdrawn, type GuardianIdentity } from "@/lib/api";
 
 type Form = {
   label: string; kind: string; environment: string; username: string; secret: string;
@@ -23,15 +23,21 @@ export default function GuardianVaultPage() {
   const [form, setForm] = useState<Form>(EMPTY);
   const [credentials, setCredentials] = useState<GuardianVaultCredential[]>([]);
   const [audit, setAudit] = useState<GuardianVaultAuditRow[]>([]);
+  const [wallets, setWallets] = useState<GuardianWallet[]>([]);
+  const [identities, setIdentities] = useState<GuardianIdentity[]>([]);
+  const [walletSecret, setWalletSecret] = useState<GuardianWalletCreated | null>(null);
+  const [walletLease, setWalletLease] = useState<GuardianWalletWithdrawn | null>(null);
   const [withdrawn, setWithdrawn] = useState<GuardianVaultWithdrawn | null>(null);
+  const [walletForm, setWalletForm] = useState({ label:"", provider:"native", wallet_type:"evm", chain:"ethereum", network:"sepolia", environment:"sandbox", purpose:"Guardian crypto wallet", approval:"sandbox_auto", allowed_consumers:"guardian", spend_limit:"0" });
+  const [identityForm, setIdentityForm] = useState({ label:"", email:"", username:"", provider:"operator-controlled", mode:"mailbox", purpose:"Guardian identity", business_engine:"", agent_id:"", associated_wallet_id:"", recovery_email:"", status:"planned" });
   const [showSecret, setShowSecret] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
 
   async function refresh(t = token) {
     if (!t) return;
-    const [c, a] = await Promise.all([api.guardianVaultCredentials(t), api.guardianVaultAudit(t)]);
-    setCredentials(c.credentials); setAudit(a.audit);
+    const [c, a, w, i] = await Promise.all([api.guardianVaultCredentials(t), api.guardianVaultAudit(t), api.guardianVaultWallets(t), api.guardianVaultIdentities(t)]);
+    setCredentials(c.credentials); setAudit(a.audit); setWallets(w.wallets); setIdentities(i.identities);
   }
 
   useEffect(() => {
@@ -66,7 +72,7 @@ export default function GuardianVaultPage() {
     setBusy(true);
     try {
       await api.guardianVaultLock(token);
-      setToken(""); setElevated(false); setCredentials([]); setAudit([]); setWithdrawn(null);
+      setToken(""); setElevated(false); setCredentials([]); setAudit([]); setWallets([]); setIdentities([]); setWithdrawn(null); setWalletSecret(null); setWalletLease(null);
       setStatus(await api.guardianVaultStatus()); setMessage("Vault locked.");
     } finally { setBusy(false); }
   }
@@ -84,6 +90,38 @@ export default function GuardianVaultPage() {
       setForm(EMPTY); setShowSecret(false); setMessage("Credential stored encrypted.");
       await refresh(); setStatus(await api.guardianVaultStatus());
     } catch (e) { setMessage(e instanceof Error ? e.message : "Credential save failed."); }
+    finally { setBusy(false); }
+  }
+
+  async function createWallet() {
+    if (!token) return;
+    setBusy(true);
+    try {
+      const r = await api.guardianVaultCreateWallet(token, { ...walletForm, allowed_consumers: walletForm.allowed_consumers.split(",").map(x=>x.trim()).filter(Boolean) });
+      setWalletSecret(r); setWalletForm(v=>({...v,label:""})); await refresh(); setMessage("Wallet created and encrypted. Save the recovery phrase offline; Guardian will not display it again after this window.");
+      window.setTimeout(()=>setWalletSecret(null), 60000);
+    } catch(e) { setMessage(e instanceof Error ? e.message : "Wallet creation failed."); }
+    finally { setBusy(false); }
+  }
+
+  async function withdrawWallet(w: GuardianWallet, recovery=false) {
+    if (!token) return;
+    setBusy(true);
+    try { const r = await api.guardianVaultWithdrawWallet(token, w.id, { consumer:"guardian", purpose:"Guardian-approved wallet signing/export", environment:w.environment, ttl_seconds:300, export_recovery:recovery }); setWalletLease(r); setMessage(recovery ? "Elevated recovery export issued for 5 minutes." : "Signing key lease issued for 5 minutes."); window.setTimeout(()=>setWalletLease(null), 30000); }
+    catch(e) { setMessage(e instanceof Error ? e.message : "Wallet withdrawal denied."); }
+    finally { setBusy(false); }
+  }
+
+  async function disableWallet(id:string) {
+    if (!token || !window.confirm("Deactivate this wallet?")) return;
+    setBusy(true); try { await api.guardianVaultDeleteWallet(token,id); await refresh(); setMessage("Wallet deactivated."); } catch(e) { setMessage(e instanceof Error ? e.message : "Wallet deactivation failed."); } finally { setBusy(false); }
+  }
+
+  async function createIdentity() {
+    if (!token) return;
+    setBusy(true);
+    try { await api.guardianVaultCreateIdentity(token, { ...identityForm, associated_wallet_id: identityForm.associated_wallet_id || null }); setIdentityForm(v=>({...v,label:"",email:"",username:""})); await refresh(); setMessage("Identity registered. External mailbox provisioning remains connector-gated."); }
+    catch(e) { setMessage(e instanceof Error ? e.message : "Identity registration failed."); }
     finally { setBusy(false); }
   }
 
@@ -169,12 +207,36 @@ export default function GuardianVaultPage() {
 
         {unlocked && (
           <>
-            <div className="grid gap-4 md:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-5">
               <Metric label="CREDENTIALS" value={String(credentials.length)}/>
+              <Metric label="WALLETS" value={String(wallets.length)}/>
+              <Metric label="IDENTITIES" value={String(identities.length)}/>
               <Metric label="SESSION" value={elevated ? "ELEVATED" : "STANDARD"}/>
-              <Metric label="RUNTIME" value={status?.runtime_auto_unlock ? "DEVICE SEALED" : "PASSPHRASE"}/>
               <Metric label="LEASE" value="5 MIN MAX"/>
             </div>
+
+            <section className="rounded-2xl border border-white/10 bg-black/30 p-6">
+              <div className="mb-5 flex items-center justify-between"><div className="flex items-center gap-3"><div className="rounded-xl border border-white/10 bg-white/5 p-3"><WalletCards size={20}/></div><div><h2 className="text-lg font-semibold">Wallet Control</h2><p className="text-xs text-white/40">BIP39/BIP44-compatible EVM and Solana wallet factory. Private material stays encrypted in Guardian Vault.</p></div></div><Badge text="LIVE CONTROL PLANE"/></div>
+              <div className="grid gap-5 xl:grid-cols-[1.1fr_.9fr]">
+                <div className="space-y-3">
+                  <div className="grid gap-3 sm:grid-cols-2"><Input value={walletForm.label} onChange={v=>setWalletForm(f=>({...f,label:v}))} placeholder="Wallet label — e.g. Research 01"/><Select value={walletForm.wallet_type} onChange={v=>setWalletForm(f=>({...f,wallet_type:v,chain:v==="solana"?"solana":"ethereum",network:v==="solana"?"devnet":"sepolia"}))} options={["evm","solana"]}/></div>
+                  <div className="grid gap-3 sm:grid-cols-2"><Input value={walletForm.provider} onChange={v=>setWalletForm(f=>({...f,provider:v}))} placeholder="Provider compatibility — native / MetaMask / Trust Wallet / Phantom"/><Input value={walletForm.chain} onChange={v=>setWalletForm(f=>({...f,chain:v}))} placeholder="Chain"/></div>
+                  <div className="grid gap-3 sm:grid-cols-3"><Input value={walletForm.network} onChange={v=>setWalletForm(f=>({...f,network:v}))} placeholder="Network"/><Select value={walletForm.environment} onChange={v=>setWalletForm(f=>({...f,environment:v}))} options={["sandbox","production","other"]}/><Select value={walletForm.approval} onChange={v=>setWalletForm(f=>({...f,approval:v}))} options={["sandbox_auto","operator","master"]}/></div>
+                  <div className="grid gap-3 sm:grid-cols-2"><Input value={walletForm.purpose} onChange={v=>setWalletForm(f=>({...f,purpose:v}))} placeholder="Purpose"/><Input value={walletForm.spend_limit} onChange={v=>setWalletForm(f=>({...f,spend_limit:v}))} placeholder="Spend limit metadata — e.g. 25 USDC/day"/></div>
+                  <Input value={walletForm.allowed_consumers} onChange={v=>setWalletForm(f=>({...f,allowed_consumers:v}))} placeholder="Approved consumers: guardian, crypto, research"/>
+                  <button disabled={busy || !walletForm.label} onClick={createWallet} className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm disabled:opacity-40"><Plus size={16}/> CREATE ENCRYPTED WALLET</button>
+                </div>
+                <div className="space-y-3">{wallets.map(w=><div key={w.id} className="rounded-xl border border-white/10 bg-white/[.03] p-4"><div className="flex items-start justify-between gap-3"><div><div className="flex flex-wrap gap-2"><b>{w.label}</b><Badge text={w.wallet_type}/><Badge text={w.environment}/></div><p className="mt-1 text-xs text-white/50 break-all">{w.address}</p><p className="mt-1 text-xs text-white/30">{w.chain} · {w.network} · {w.provider} · path {w.derivation_path}</p></div><button onClick={()=>disableWallet(w.id)} className="rounded-lg border border-white/10 px-2 py-1 text-xs">DISABLE</button></div><div className="mt-3 flex flex-wrap gap-2"><button disabled={busy} onClick={()=>withdrawWallet(w,false)} className="rounded-lg border border-white/10 px-3 py-2 text-xs">SIGNING LEASE</button><button disabled={busy || !elevated} onClick={()=>withdrawWallet(w,true)} className="rounded-lg border border-white/15 bg-white/10 px-3 py-2 text-xs">RECOVERY EXPORT</button></div></div>)}{!wallets.length && <div className="rounded-xl border border-dashed border-white/10 p-10 text-center text-sm text-white/35">No wallets registered.</div>}</div>
+              </div>
+            </section>
+
+            {walletSecret && <section className="rounded-2xl border border-white/10 bg-black/40 p-6"><h2 className="font-semibold">New Wallet — One-Time Recovery Window</h2><p className="mt-1 text-xs text-white/40">Store this recovery phrase offline. It will disappear automatically.</p><div className="mt-4 grid gap-3 md:grid-cols-2"><Secret label="RECOVERY PHRASE" value={walletSecret.recovery_phrase} onCopy={copy}/><Secret label="PRIVATE KEY" value={walletSecret.private_key} secret onCopy={copy}/></div></section>}
+            {walletLease && <section className="rounded-2xl border border-white/10 bg-black/40 p-6"><div className="flex items-center justify-between"><div><h2 className="font-semibold">Wallet Signing Lease</h2><p className="text-xs text-white/35">{walletLease.address} · expires {time(walletLease.expires_at)}</p></div><Badge text={walletLease.recovery_phrase ? "ELEVATED EXPORT" : "SIGNING ACCESS"}/></div><div className="mt-4 grid gap-3 md:grid-cols-2"><Secret label="PRIVATE KEY" value={walletLease.private_key} secret onCopy={copy}/>{walletLease.recovery_phrase && <Secret label="RECOVERY PHRASE" value={walletLease.recovery_phrase} onCopy={copy}/>}</div></section>}
+
+            <section className="rounded-2xl border border-white/10 bg-black/30 p-6">
+              <div className="mb-5 flex items-center gap-3"><div className="rounded-xl border border-white/10 bg-white/5 p-3"><UserRound size={20}/></div><div><h2 className="text-lg font-semibold">Identity Factory</h2><p className="text-xs text-white/40">Register legitimate mailboxes, aliases and service identities; external provider account creation stays connector-gated.</p></div></div>
+              <div className="grid gap-5 xl:grid-cols-[1fr_1fr]"><div className="grid gap-3"><div className="grid gap-3 sm:grid-cols-2"><Input value={identityForm.label} onChange={v=>setIdentityForm(f=>({...f,label:v}))} placeholder="Identity label"/><Input value={identityForm.email} onChange={v=>setIdentityForm(f=>({...f,email:v}))} placeholder="Email / alias"/></div><div className="grid gap-3 sm:grid-cols-2"><Input value={identityForm.username} onChange={v=>setIdentityForm(f=>({...f,username:v}))} placeholder="Username"/><Input value={identityForm.provider} onChange={v=>setIdentityForm(f=>({...f,provider:v}))} placeholder="Provider / domain you control"/></div><div className="grid gap-3 sm:grid-cols-2"><Select value={identityForm.mode} onChange={v=>setIdentityForm(f=>({...f,mode:v}))} options={["mailbox","alias","external"]}/><Select value={identityForm.status} onChange={v=>setIdentityForm(f=>({...f,status:v}))} options={["planned","provisioning","active","paused"]}/></div><Input value={identityForm.business_engine} onChange={v=>setIdentityForm(f=>({...f,business_engine:v}))} placeholder="Business engine — e.g. Sales / Media / Research"/><Input value={identityForm.agent_id} onChange={v=>setIdentityForm(f=>({...f,agent_id:v}))} placeholder="Agent ID (optional)"/><Select value={identityForm.associated_wallet_id} onChange={v=>setIdentityForm(f=>({...f,associated_wallet_id:v}))} options={["",...wallets.map(w=>w.id)]}/><Input value={identityForm.recovery_email} onChange={v=>setIdentityForm(f=>({...f,recovery_email:v}))} placeholder="Recovery email"/><button disabled={busy || !identityForm.label || !identityForm.email || !identityForm.username} onClick={createIdentity} className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm disabled:opacity-40"><UserRound size={16}/> REGISTER IDENTITY</button></div><div className="space-y-3">{identities.map(i=><div key={i.id} className="rounded-xl border border-white/10 bg-white/[.03] p-4"><div className="flex items-center justify-between gap-3"><div><b>{i.label}</b><p className="text-xs text-white/55">{i.email} · {i.username}</p><p className="mt-1 text-xs text-white/30">{i.provider} · {i.mode} · {i.business_engine || "unassigned"} · {i.status}</p></div><Badge text={i.status}/></div></div>)}{!identities.length && <div className="rounded-xl border border-dashed border-white/10 p-10 text-center text-sm text-white/35">No identities registered.</div>}</div></div>
+            </section>
 
             <div className="grid gap-6 xl:grid-cols-[1.2fr_.8fr]">
               <section className="rounded-2xl border border-white/10 bg-black/30 p-6">

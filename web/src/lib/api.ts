@@ -688,6 +688,64 @@ export const api = {
     }),
   guardianVaultGeneratePassword: (length = 24) =>
     fetchJSON<{ password: string }>(`/api/guardian/vault/generate-password?length=${length}`),
+  guardianVaultWallets: (token: string) =>
+    fetchJSON<{ wallets: GuardianWallet[] }>(`/api/guardian/vault/wallets`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+  guardianVaultCreateWallet: (token: string, body: {
+    label: string; provider?: string; wallet_type: string; chain: string; network: string;
+    environment?: string; purpose?: string; approval?: string; allowed_consumers?: string[];
+    notes?: string; spend_limit?: string;
+  }) =>
+    fetchJSON<GuardianWalletCreated>(`/api/guardian/vault/wallets`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body),
+    }),
+  guardianVaultImportWallet: (token: string, body: {
+    label: string; provider?: string; wallet_type: string; chain: string; network: string;
+    mnemonic: string; environment?: string; purpose?: string; approval?: string;
+    allowed_consumers?: string[]; notes?: string; spend_limit?: string;
+  }) =>
+    fetchJSON<GuardianWallet>(`/api/guardian/vault/wallets/import`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body),
+    }),
+  guardianVaultWithdrawWallet: (token: string, id: string, body: {
+    consumer?: string; purpose?: string; environment: string; ttl_seconds?: number; export_recovery?: boolean;
+  }) =>
+    fetchJSON<GuardianWalletWithdrawn>(`/api/guardian/vault/wallets/${encodeURIComponent(id)}/withdraw`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body),
+    }),
+  guardianVaultDeleteWallet: (token: string, id: string) =>
+    fetchJSON<{ ok: boolean }>(`/api/guardian/vault/wallets/${encodeURIComponent(id)}`, {
+      method: "DELETE", headers: { Authorization: `Bearer ${token}` },
+    }),
+  guardianVaultIdentities: (token: string) =>
+    fetchJSON<{ identities: GuardianIdentity[] }>(`/api/guardian/vault/identities`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+  guardianVaultCreateIdentity: (token: string, body: {
+    label: string; email: string; username: string; provider?: string; mode?: string;
+    purpose?: string; business_engine?: string; agent_id?: string; associated_wallet_id?: string | null;
+    recovery_email?: string; notes?: string; status?: string;
+  }) =>
+    fetchJSON<GuardianIdentity>(`/api/guardian/vault/identities`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body),
+    }),
+  guardianVaultIdentityStatus: (token: string, id: string, status: string) =>
+    fetchJSON<{ ok: boolean }>(`/api/guardian/vault/identities/${encodeURIComponent(id)}/status`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ status }),
+    }),
+  guardianVaultIdentityFactoryStatus: () =>
+    fetchJSON<{ ready: boolean; mode: string; message: string }>(`/api/guardian/vault/identity-factory/status`),
 
   // Cron jobs
   getCronJobs: (profile = "all") =>
@@ -2479,6 +2537,62 @@ export interface GuardianVaultWithdrawn {
   url: string;
   issued_at: number;
   expires_at: number;
+}
+
+export interface GuardianWallet {
+  id: string;
+  label: string;
+  provider: string;
+  wallet_type: string;
+  chain: string;
+  network: string;
+  environment: string;
+  purpose: string;
+  address: string;
+  derivation_path: string;
+  allowed_consumers: string[];
+  approval: string;
+  spend_limit: string;
+  active: boolean;
+  created_at: number;
+  updated_at: number;
+  last_used_at?: number | null;
+}
+
+export interface GuardianWalletCreated extends GuardianWallet {
+  recovery_phrase: string;
+  private_key: string;
+}
+
+export interface GuardianWalletWithdrawn {
+  wallet_id: string;
+  label: string;
+  wallet_type: string;
+  chain: string;
+  network: string;
+  address: string;
+  lease_id: string;
+  private_key: string;
+  recovery_phrase?: string;
+  issued_at: number;
+  expires_at: number;
+}
+
+export interface GuardianIdentity {
+  id: string;
+  label: string;
+  email: string;
+  username: string;
+  provider: string;
+  mode: string;
+  purpose: string;
+  business_engine: string;
+  agent_id: string;
+  associated_wallet_id?: string | null;
+  recovery_email: string;
+  status: string;
+  created_at: number;
+  updated_at: number;
 }
 
 export interface CronJob {
