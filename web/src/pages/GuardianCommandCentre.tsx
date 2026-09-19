@@ -5,7 +5,7 @@ import {
   Cpu, Network, Pause, Play, Radar, RefreshCw, Rocket, Server, ShieldCheck,
   Terminal, Workflow, Zap, type LucideIcon,
 } from "lucide-react";
-import { api, type CronJob, type EnvVarInfo, type StatusResponse } from "@/lib/api";
+import { api, type CronJob, type EnvVarInfo, type GuardianWorkflow, type StatusResponse } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 type NodeStats = {
@@ -70,6 +70,7 @@ export default function GuardianCommandCentre() {
   const [hub, setHub] = useState<HubRow[]>([]);
   const [catalog, setCatalog] = useState<any>(null);
   const [jobs, setJobs] = useState<CronJob[]>([]);
+  const [workflows, setWorkflows] = useState<GuardianWorkflow[]>([]);
   const [sessions, setSessions] = useState<any[]>([]);
   const [skills, setSkills] = useState<any[]>([]);
   const [toolsets, setToolsets] = useState<any[]>([]);
@@ -91,10 +92,10 @@ export default function GuardianCommandCentre() {
       fetch("http://127.0.0.1:8781/api/stats", { cache: "no-store" }).then(async r => {
         if (!r.ok) throw new Error(String(r.status)); return r.json() as Promise<NodeStats>;
       }),
-      api.getPluginsHub(), api.getPluginsCatalog(), api.getCronJobs("all"),
+      api.getPluginsHub(), api.getPluginsCatalog(), api.getCronJobs("all"), api.getGuardianWorkflows(40),
       api.getSessions(30, 0, { order: "recent" }), api.getEnvVars(), api.getSkills(), api.getToolsets(),
     ]);
-    const [s, n, h, c, j, ss, e, sk, ts] = results;
+    const [s, n, h, c, j, wf, ss, e, sk, ts] = results;
     if (s.status === "fulfilled") setStatus(s.value);
     if (n.status === "fulfilled") {
       setNode(n.value);
@@ -104,6 +105,7 @@ export default function GuardianCommandCentre() {
     if (h.status === "fulfilled") setHub(h.value.plugins ?? []);
     if (c.status === "fulfilled") setCatalog(c.value);
     if (j.status === "fulfilled") setJobs(j.value);
+    if (wf.status === "fulfilled") setWorkflows(wf.value.workflows ?? []);
     if (ss.status === "fulfilled") setSessions(ss.value.sessions ?? []);
     if (e.status === "fulfilled") setEnv(e.value as unknown as EnvMap);
     if (sk.status === "fulfilled") setSkills(sk.value);
@@ -136,10 +138,9 @@ export default function GuardianCommandCentre() {
     const key = v.toLowerCase();
     try {
       if (key === "start-it" || key === "start") {
-        const job = await api.createCronJob({ name: "Guardian START-IT", prompt: "Operate as Guardian OS. Execute this mission end-to-end with available skills and plugins while respecting security and economic gates. Mission: " + v, schedule: "in 1m", deliver: "local" }, "default");
-        await api.triggerCronJob(job.id, "default");
+        const workflow = await api.launchGuardianWorkflow({ engine: "general", name: "Guardian START-IT", mission: "Execute the approved Guardian START-IT mission using the unified workflow controller: " + v, profile: "default" });
         setTab("automation");
-        event("START-IT fired · " + job.id, "live");
+        event("START-IT workflow launched · " + workflow.id, "live");
       }
       else if (key === "status" || key === "refresh") { await refresh(); event("Guardian telemetry refreshed"); }
       else if (key === "plugins" || key === "tools") setTab("tools");
@@ -147,33 +148,21 @@ export default function GuardianCommandCentre() {
       else if (key === "automation" || key === "cron") setTab("automation");
       else if (key === "security") setTab("security");
       else {
-        const job = await api.createCronJob({
-          name: "Guardian Mission · " + v.slice(0, 42),
-          prompt: "Operate as Guardian OS. Execute this mission end-to-end with all available skills, plugins and safe external tools. Respect authorization, economic and capital-protection gates. Mission: " + v,
-          schedule: "in 1m",
-          deliver: "local"
-        }, "default");
-        await api.triggerCronJob(job.id, "default");
+        const workflow = await api.launchGuardianWorkflow({ engine: "general", name: "Guardian Mission · " + v.slice(0, 42), mission: v, profile: "default" });
         setTab("automation");
-        event("Mission launched · " + job.id, "live");
+        event("Mission workflow launched · " + workflow.id, "live");
       }
     } finally { setCommand(""); setBusy(false); }
   }
 
-  async function runEngine(engineName: string, description: string) {
+  async function runEngine(engineId: string, engineName: string, description: string) {
     setBusy(true);
     try {
-      const job = await api.createCronJob({
-        name: "Guardian Engine · " + engineName,
-        prompt: "Operate the Guardian business engine '" + engineName + "'. Execute the workflow using available research, browser, creative, engineering and runtime capabilities. Mission definition: " + description + ". Do not use live trading or move capital; stop at the applicable gate and report the exact blocker if credentials or authorization are required.",
-        schedule: "in 1m",
-        deliver: "local"
-      }, "default");
-      await api.triggerCronJob(job.id, "default");
+      const workflow = await api.launchGuardianWorkflow({ engine: engineId, name: "Guardian Engine · " + engineName, mission: description, profile: "default" });
       setTab("automation");
-      event("Engine launched · " + engineName + " · " + job.id, "live");
+      event("Workflow launched · " + engineName + " · " + workflow.id, "live");
     } catch {
-      event("Engine launch failed · " + engineName, "warn");
+      event("Workflow launch failed · " + engineName, "warn");
     } finally { setBusy(false); }
   }
 
@@ -182,6 +171,19 @@ export default function GuardianCommandCentre() {
     setBusy(true);
     try { await api.triggerCronJob(job.id); event("Automation fired · " + String(job.name ?? job.id), "live"); await refresh(); }
     catch { event("Automation failed · " + String(job.name ?? job.id), "warn"); }
+    finally { setBusy(false); }
+  }
+
+  async function workflowAction(id: string, action: "pause" | "resume" | "retry" | "cancel") {
+    setBusy(true);
+    try {
+      if (action === "pause") await api.pauseGuardianWorkflow(id);
+      if (action === "resume") await api.resumeGuardianWorkflow(id);
+      if (action === "retry") await api.retryGuardianWorkflow(id);
+      if (action === "cancel") await api.cancelGuardianWorkflow(id);
+      event("Workflow " + action + " · " + id, action === "cancel" ? "warn" : "live");
+      await refresh();
+    } catch { event("Workflow " + action + " failed · " + id, "warn"); }
     finally { setBusy(false); }
   }
 
@@ -224,7 +226,7 @@ export default function GuardianCommandCentre() {
             {tab === "mission" && <Mission node={node} status={status} jobs={jobs} events={events} sessions={sessionsCount} activeJobs={activeJobs} cpuHistory={cpuHistory} ramHistory={ramHistory} />}
             {tab === "engines" && <Engines rows={engineRows} env={env} busy={busy} onLaunch={runEngine} />}
             {tab === "agents" && <Agents sessions={sessions} skills={skills} />}
-            {tab === "automation" && <Automation jobs={jobs} busy={busy} onRun={runJob} />}
+            {tab === "automation" && <Automation jobs={jobs} workflows={workflows} busy={busy} onRun={runJob} onWorkflowAction={workflowAction} />}
             {tab === "tools" && <Tools hub={hub} catalog={catalog} toolsets={toolsets} busy={busy} onToggle={pluginToggle} onInstall={pluginInstall} />}
             {tab === "security" && <Security status={status} node={node} env={env} />}
           </section>
@@ -311,13 +313,13 @@ function TelemetryChart({icon:Icon,label,values}:{icon:LucideIcon;label:string;v
 function gatewayStatus(s:StatusResponse|null){return s?.gateway_state??"UNKNOWN";}
 function Health({label,value,good}:{label:string;value:string;good:boolean}) { return <div className="g-health"><i className={good?"good":"gate"}/><div><b>{label}</b><small>{value}</small></div><span>{good?"READY":"GATED"}</span></div>; }
 function Bar({label,value}:{label:string;value:number}) { return <div className="g-bar"><div><span>{label}</span><b>{Math.round(clamp(value))}%</b></div><i><em style={{width:Math.round(clamp(value))+"%"}}/></i></div>; }
-function Engines({rows,env,busy,onLaunch}:{rows:any[];env:EnvMap|null;busy:boolean;onLaunch:(name:string,description:string)=>void}) {
+function Engines({rows,env,busy,onLaunch}:{rows:any[];env:EnvMap|null;busy:boolean;onLaunch:(id:string,name:string,description:string)=>void}) {
   return <div className="g-stack"><Panel title="Business Engine Fabric" sub="Real workflow surfaces, with credential gates shown honestly" icon={BriefcaseBusiness}>
     <div className="g-engine-grid">{rows.map(r=><article className="g-engine" key={r.id}>
       <div className="g-engine-head"><div><b>{r.name}</b><small>{r.desc}</small></div><State text={r.ready?"READY":"GATED"} good={r.ready}/></div>
       <div className="g-flow"><span>DISCOVER</span><ChevronRight/><span>EXECUTE</span><ChevronRight/><span>MEASURE</span></div>
       {r.gate&&<code>{r.gate} · {hasKey(env,r.gate)?"configured":"required"}</code>}
-      <button className="g-engine-run" onClick={()=>onLaunch(r.name,r.desc)} disabled={busy}>RUN ENGINE</button>
+      <button className="g-engine-run" onClick={()=>onLaunch(r.id,r.name,r.desc)} disabled={busy}>RUN ENGINE</button>
     </article>)}</div>
   </Panel><Panel title="Revenue Control Plane" sub="The revenue systems discussed are represented as end-to-end workflow domains" icon={Database}>
     <div className="g-four"><Stat label="LEADS" value="BOND + RECOVERY"/><Stat label="CONTENT" value="NEWS + MEDIA"/><Stat label="CRYPTO" value="INTEL + FORENSICS"/><Stat label="QUANT" value="PAPER ONLY"/></div>
@@ -333,13 +335,50 @@ function Agents({sessions,skills}:{sessions:any[];skills:any[]}) {
     <div className="g-note"><Rocket/> START-IT opens the orchestration layer; actual execution is backed by Hermes jobs and protected tool calls.</div>
   </Panel></div>;
 }
-function Automation({jobs,busy,onRun}:{jobs:CronJob[];busy:boolean;onRun:(job:CronJob)=>void}) {
-  return <div className="g-stack"><Panel title="Automation Centre" sub="Run existing enabled Hermes jobs directly" icon={Clock3}>
-    <div className="g-four"><Stat label="ACTIVE" value={String(jobs.filter(j=>j.enabled!==false).length)}/><Stat label="PAUSED" value={String(jobs.filter(j=>j.enabled===false).length)}/><Stat label="NEXT" value={String(jobs.filter(j=>j.next_run_at).length)}/><Stat label="FAILED" value={String(jobs.filter(j=>String(j.last_status).toLowerCase()==="failed").length)}/></div>
-    <div className="g-job-list">{jobs.slice(0,20).map(j=><div className="g-job" key={j.id}><div><b>{j.name??j.id}</b><small>{j.prompt??"No prompt preview"}</small><code>{j.schedule_display??j.schedule?.display??j.schedule?.expr??"event-driven"}</code></div><div className="g-job-side"><State text={j.enabled===false?"PAUSED":"ACTIVE"} good={j.enabled!==false}/><button onClick={()=>onRun(j)} disabled={busy||j.enabled===false}><Play/></button></div></div>)}{!jobs.length&&<Empty text="No jobs returned by Hermes."/>}</div>
-  </Panel><Panel title="Reusable Workflow Surface" sub="Promote one-off missions into durable schedules" icon={Layers3}>
-    <div className="g-workflow-grid"><div><b>MISSION BUILDER</b><span>Idea → research → build → deploy → report.</span><button onClick={()=>window.location.assign("/cron")}>OPEN AUTOMATION</button></div><div><b>WATCHER BUILDER</b><span>Condition checks → event → gated action.</span><button onClick={()=>window.location.assign("/cron")}>OPEN WATCHERS</button></div></div>
-  </Panel></div>;
+function Automation({jobs,workflows,busy,onRun,onWorkflowAction}:{jobs:CronJob[];workflows:GuardianWorkflow[];busy:boolean;onRun:(job:CronJob)=>void;onWorkflowAction:(id:string,action:"pause"|"resume"|"retry"|"cancel")=>void}) {
+  const running = workflows.filter(w=>w.state==="running").length;
+  const paused = workflows.filter(w=>w.state==="paused").length;
+  const failed = workflows.filter(w=>w.state==="failed").length;
+  const completed = workflows.filter(w=>w.state==="completed").length;
+  return <div className="g-stack">
+    <Panel title="Guardian Workflow Controller" sub="Persistent multi-stage business workflows backed by the Hermes execution ledger" icon={Workflow}>
+      <div className="g-four">
+        <Stat label="RUNNING" value={String(running)}/>
+        <Stat label="PAUSED" value={String(paused)}/>
+        <Stat label="FAILED" value={String(failed)}/>
+        <Stat label="COMPLETED" value={String(completed)}/>
+      </div>
+      <div className="g-job-list">
+        {workflows.slice(0,20).map(w=>{
+          const current = w.steps?.[Math.min(w.current_step, Math.max(0,(w.steps?.length??1)-1))];
+          const done = w.steps?.filter(s=>s.status==="completed").length ?? 0;
+          const total = w.steps?.length ?? 0;
+          const pct = total ? Math.round((done/total)*100) : 0;
+          const action = w.state==="paused" ? "resume" : w.state==="failed" ? "retry" : w.state==="running" ? "pause" : null;
+          return <div className="g-job" key={w.id}>
+            <div>
+              <b>{w.name}</b>
+              <small>{w.engine.toUpperCase()} · {current?.name ?? "DONE"} · {done}/{total} stages · {pct}%</small>
+              <code>{w.id} · {w.state.toUpperCase()}{w.last_error ? " · " + w.last_error.slice(0,90) : ""}</code>
+            </div>
+            <div className="g-job-side">
+              <State text={w.state.toUpperCase()} good={w.state==="running"||w.state==="completed"}/>
+              {action && <button onClick={()=>onWorkflowAction(w.id,action)} disabled={busy}>{action==="pause"?<Pause/>:action==="resume"?<Play/>:<RefreshCw/>}</button>}
+              {(w.state==="running"||w.state==="paused") && <button onClick={()=>onWorkflowAction(w.id,"cancel")} disabled={busy}><CircleDashed/></button>}
+            </div>
+          </div>;
+        })}
+        {!workflows.length&&<Empty text="No Guardian workflows launched yet. Use START-IT or RUN ENGINE."/>}
+      </div>
+    </Panel>
+    <Panel title="Automation Centre" sub="Run existing enabled Hermes jobs directly" icon={Clock3}>
+      <div className="g-four"><Stat label="ACTIVE" value={String(jobs.filter(j=>j.enabled!==false).length)}/><Stat label="PAUSED" value={String(jobs.filter(j=>j.enabled===false).length)}/><Stat label="NEXT" value={String(jobs.filter(j=>j.next_run_at).length)}/><Stat label="FAILED" value={String(jobs.filter(j=>String(j.last_status).toLowerCase()==="failed").length)}/></div>
+      <div className="g-job-list">{jobs.slice(0,20).map(j=><div className="g-job" key={j.id}><div><b>{j.name??j.id}</b><small>{j.prompt??"No prompt preview"}</small><code>{j.schedule_display??j.schedule?.display??j.schedule?.expr??"event-driven"}</code></div><div className="g-job-side"><State text={j.enabled===false?"PAUSED":"ACTIVE"} good={j.enabled!==false}/><button onClick={()=>onRun(j)} disabled={busy||j.enabled===false}><Play/></button></div></div>)}{!jobs.length&&<Empty text="No jobs returned by Hermes."/>}</div>
+    </Panel>
+    <Panel title="Reusable Workflow Surface" sub="Promote one-off missions into durable schedules" icon={Layers3}>
+      <div className="g-workflow-grid"><div><b>MISSION BUILDER</b><span>Idea → research → build → deploy → report.</span><button onClick={()=>window.location.assign("/cron")}>OPEN AUTOMATION</button></div><div><b>WATCHER BUILDER</b><span>Condition checks → event → gated action.</span><button onClick={()=>window.location.assign("/cron")}>OPEN WATCHERS</button></div></div>
+    </Panel>
+  </div>;
 }
 function Tools({hub,catalog,toolsets,busy,onToggle,onInstall}:{hub:HubRow[];catalog:any;toolsets:any[];busy:boolean;onToggle:(name:string,enabled:boolean)=>void;onInstall:(entry:any)=>void}) {
   const entries=Array.isArray(catalog?.entries)?catalog.entries:[];

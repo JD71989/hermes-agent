@@ -652,6 +652,22 @@ export const api = {
     fetchJSON<CronJob>(`/api/cron/jobs/${encodeURIComponent(id)}/resume?profile=${encodeURIComponent(profile)}`, { method: "POST" }),
   triggerCronJob: (id: string, profile = "default") =>
     fetchJSON<CronJob>(`/api/cron/jobs/${encodeURIComponent(id)}/trigger?profile=${encodeURIComponent(profile)}`, { method: "POST" }),
+  getGuardianWorkflowEngines: () =>
+    fetchJSON<{ engines: GuardianWorkflowEngine[] }>("/api/guardian/workflow-engines"),
+  getGuardianWorkflows: (limit = 50) =>
+    fetchJSON<{ workflows: GuardianWorkflow[] }>(`/api/guardian/workflows?limit=${limit}`),
+  launchGuardianWorkflow: (body: GuardianWorkflowLaunch) =>
+    fetchJSON<GuardianWorkflow>("/api/guardian/workflows", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+    }),
+  pauseGuardianWorkflow: (id: string) =>
+    fetchJSON<GuardianWorkflow>(`/api/guardian/workflows/${encodeURIComponent(id)}/pause`, { method: "POST" }),
+  resumeGuardianWorkflow: (id: string) =>
+    fetchJSON<GuardianWorkflow>(`/api/guardian/workflows/${encodeURIComponent(id)}/resume`, { method: "POST" }),
+  retryGuardianWorkflow: (id: string) =>
+    fetchJSON<GuardianWorkflow>(`/api/guardian/workflows/${encodeURIComponent(id)}/retry`, { method: "POST" }),
+  cancelGuardianWorkflow: (id: string) =>
+    fetchJSON<GuardianWorkflow>(`/api/guardian/workflows/${encodeURIComponent(id)}/cancel`, { method: "POST" }),
   deleteCronJob: (id: string, profile = "default") =>
     fetchJSON<{ ok: boolean }>(`/api/cron/jobs/${encodeURIComponent(id)}?profile=${encodeURIComponent(profile)}`, { method: "DELETE" }),
 
@@ -2296,6 +2312,54 @@ export interface CronJobMutation {
   context_from?: string[] | null;
   enabled_toolsets?: string[] | null;
   workdir?: string | null;
+}
+
+export interface GuardianWorkflowEngine {
+  id: string;
+  stages: Array<{ name: string }>;
+}
+
+export interface GuardianWorkflowStep {
+  id: string;
+  workflow_id: string;
+  step_index: number;
+  name: string;
+  prompt: string;
+  status: string;
+  cron_job_id?: string | null;
+  execution_id?: string | null;
+  retry_count?: number;
+  started_at?: string | null;
+  finished_at?: string | null;
+  error?: string | null;
+}
+
+export interface GuardianWorkflowEvent {
+  at: string;
+  type: string;
+  message: string;
+}
+
+export interface GuardianWorkflow {
+  id: string;
+  engine: string;
+  name: string;
+  mission: string;
+  profile: string;
+  state: "queued" | "running" | "paused" | "completed" | "failed" | "canceled" | string;
+  current_step: number;
+  created_at: string;
+  updated_at: string;
+  last_error?: string | null;
+  steps: GuardianWorkflowStep[];
+  events?: GuardianWorkflowEvent[];
+}
+
+export interface GuardianWorkflowLaunch {
+  engine: string;
+  mission: string;
+  name?: string;
+  profile?: string;
 }
 
 export interface CronJob {
