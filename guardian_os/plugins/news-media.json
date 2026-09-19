@@ -1,0 +1,13 @@
+{
+  "id":"news-media",
+  "name":"News Media Engine",
+  "version":"0.1.0",
+  "status":"development",
+  "purpose":"discover_research_publish_and_monetize_original_content",
+  "departments":["research-intelligence","marketing","engineering","finance","operations"],
+  "agents":["trend_detector","researcher","cross_checker","originality_checker","editorial_agent","seo_agent","publisher","analytics_agent"],
+  "capabilities":["web_research","content","seo","analytics","publishing","originality_check"],
+  "revenue_models":["advertising","affiliate","leads"],
+  "risk_controls":{"human_review_required":true,"external_credentials_required":true,"copyright_safeguards":true},
+  "external_actions_enabled":false
+}

@@ -1,0 +1,11 @@
+{
+  "departments": [
+    {"id":"marketing","name":"Marketing","capabilities":["content","social","seo","websites","creative","advertising","analytics","publishing","originality_check"]},
+    {"id":"security","name":"Security","capabilities":["cybersecurity","vulnerability_research","monitoring","threat_intelligence","cyberlab"]},
+    {"id":"research-intelligence","name":"Research & Intelligence","capabilities":["web_research","market_research","competitive_intelligence","data_analysis"]},
+    {"id":"engineering","name":"Engineering","capabilities":["software","websites","apis","infrastructure","deployment"]},
+    {"id":"sales-leads","name":"Sales & Leads","capabilities":["lead_generation","qualification","crm","outreach","intent_scoring","lead_capture","deduplication","lead_routing"]},
+    {"id":"finance","name":"Finance","capabilities":["revenue","costs","pnl","opportunity_analysis"]},
+    {"id":"operations","name":"Operations","capabilities":["workflows","automation","agents","scheduling","communications","telephony"]}
+  ]
+}

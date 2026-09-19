@@ -96,6 +96,8 @@ const ChannelsPage = lazy(() => import("@/pages/ChannelsPage"));
 const WebhooksPage = lazy(() => import("@/pages/WebhooksPage"));
 const SystemPage = lazy(() => import("@/pages/SystemPage"));
 const ChatPage = lazy(() => import("@/pages/ChatPage"));
+const GuardianCommandPage = lazy(() => import("@/pages/GuardianCommandPage"));
+const GuardianArchitecturePage = lazy(() => import("@/pages/GuardianArchitecturePage"));
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useI18n } from "@/i18n";
@@ -125,7 +127,7 @@ function RouteFallback({ label = "Loading…" }: { label?: string }) {
 }
 
 function RootRedirect() {
-  return <Navigate to="/sessions" replace />;
+  return <Navigate to="/guardian" replace />;
 }
 
 function UnknownRouteFallback({ pluginsLoading }: { pluginsLoading: boolean }) {
@@ -156,6 +158,9 @@ const CHAT_NAV_ITEM: NavItem = {
  */
 const BUILTIN_ROUTES_CORE: Record<string, ComponentType> = {
   "/": RootRedirect,
+  "/guardian": GuardianCommandPage,
+  "/guardian/department/:id": () => <GuardianArchitecturePage />,
+  "/guardian/business/:id": () => <GuardianArchitecturePage />,
   "/sessions": SessionsPage,
   "/files": FilesPage,
   "/analytics": AnalyticsPage,
@@ -185,6 +190,7 @@ function ChatRouteSink() {
 }
 
 const BUILTIN_NAV_REST: NavItem[] = [
+  { path: "/guardian", label: "Guardian", icon: ShieldCheck },
   {
     path: "/sessions",
     labelKey: "sessions",

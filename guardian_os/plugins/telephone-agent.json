@@ -1,0 +1,11 @@
+{
+  "id":"telephone-agent",
+  "name":"Telephone Agent Capability",
+  "version":"0.1.0",
+  "type":"capability",
+  "status":"foundation",
+  "department":"operations",
+  "capabilities":["telephony","call_routing","call_qualification","call_scheduling"],
+  "external_actions_enabled":false,
+  "requires_credentials":true
+}
