@@ -96,6 +96,7 @@ const ChannelsPage = lazy(() => import("@/pages/ChannelsPage"));
 const WebhooksPage = lazy(() => import("@/pages/WebhooksPage"));
 const SystemPage = lazy(() => import("@/pages/SystemPage"));
 const ChatPage = lazy(() => import("@/pages/ChatPage"));
+const GuardianCommandCentre = lazy(() => import("@/pages/GuardianCommandCentre"));
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useI18n } from "@/i18n";
@@ -156,6 +157,7 @@ const CHAT_NAV_ITEM: NavItem = {
  */
 const BUILTIN_ROUTES_CORE: Record<string, ComponentType> = {
   "/": RootRedirect,
+  "/guardian": GuardianCommandCentre,
   "/sessions": SessionsPage,
   "/files": FilesPage,
   "/analytics": AnalyticsPage,
@@ -185,6 +187,11 @@ function ChatRouteSink() {
 }
 
 const BUILTIN_NAV_REST: NavItem[] = [
+  {
+    path: "/guardian",
+    label: "Guardian Command Centre",
+    icon: Shield,
+  },
   {
     path: "/sessions",
     labelKey: "sessions",
@@ -552,7 +559,7 @@ export default function App() {
         </Button>
 
         <Typography className="font-bold text-[0.95rem] leading-[0.95] tracking-[0.05em] text-midground">
-          {t.app.brand}
+          GUARDIAN OS
         </Typography>
       </header>
 
@@ -615,9 +622,9 @@ export default function App() {
                 <PluginSlot name="header-left" />
 
                 <Typography className="font-bold text-[1.125rem] leading-[0.95] tracking-[0.0525rem] text-midground uppercase">
-                  Hermes
+                  Guardian
                   <br />
-                  Agent
+                  OS
                 </Typography>
               </div>
 
