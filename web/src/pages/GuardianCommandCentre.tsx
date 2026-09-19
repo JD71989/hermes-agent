@@ -244,6 +244,7 @@ function Header({ live, gateway, colibri, busy, onRefresh }: { live:boolean; gat
     </div></div>
     <div className="g-head-actions">
       <Badge text={live ? "LIVE" : "WAITING"} good={live}/><Badge text={gateway ? "HERMES ONLINE" : "HERMES OFFLINE"} good={gateway}/><Badge text={colibri ? "COLIBRÌ ONLINE" : "COLIBRÌ OFFLINE"} good={colibri}/>
+      <a href="/guardian/vault" className="g-icon" title="Guardian Vault"><LockKeyhole/></a>
       <button className="g-icon" onClick={onRefresh} disabled={busy}><RefreshCw className={cn(busy && "spin")}/></button>
     </div>
   </header>;
@@ -263,7 +264,7 @@ function Hero({command,setCommand,busy,onRun,onTab,node,status,sessions}:{comman
       <h2>ONE COMMAND.<br/><span>EVERY CAPABILITY.</span></h2>
       <p>Everything discussed becomes a real Guardian surface: engines, plugins, agents, automation, creative tools, deployment, research and revenue workflows.</p>
       <div className="g-command"><Terminal/><input value={command} onChange={e=>setCommand(e.target.value)} onKeyDown={e=>e.key==="Enter"&&onRun()} placeholder="START-IT · REVENUE · PLUGINS · AUTOMATION · SECURITY"/><button onClick={()=>onRun()} disabled={busy}>RUN</button></div>
-      <div className="g-quick"><Quick text="START-IT" icon={Rocket} onClick={()=>onRun("START-IT")}/><Quick text="BUSINESS" icon={BriefcaseBusiness} onClick={()=>onTab("engines")}/><Quick text="AUTOMATION" icon={Workflow} onClick={()=>onTab("automation")}/><Quick text="TOOL FABRIC" icon={Layers3} onClick={()=>onTab("tools")}/><Quick text="SECURITY" icon={ShieldCheck} onClick={()=>onTab("security")}/></div>
+      <div className="g-quick"><Quick text="START-IT" icon={Rocket} onClick={()=>onRun("START-IT")}/><Quick text="BUSINESS" icon={BriefcaseBusiness} onClick={()=>onTab("engines")}/><Quick text="AUTOMATION" icon={Workflow} onClick={()=>onTab("automation")}/><Quick text="TOOL FABRIC" icon={Layers3} onClick={()=>onTab("tools")}/><Quick text="SECURITY" icon={ShieldCheck} onClick={()=>onTab("security")}/><Quick text="VAULT" icon={LockKeyhole} onClick={()=>{ window.location.href="/guardian/vault"; }}/></div>
     </div>
     <div className="g-metrics">{metrics.map(([label,value,detail])=><div className="g-metric" key={label}><small>{label}</small><b>{value}</b><span>{detail}</span></div>)}</div>
   </section>;

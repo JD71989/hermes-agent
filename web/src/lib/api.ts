@@ -622,6 +622,73 @@ export const api = {
       body: JSON.stringify({ key }),
     }),
 
+  // Guardian Vault — encrypted credential control plane
+  guardianVaultStatus: () =>
+    fetchJSON<GuardianVaultStatus>("/api/guardian/vault/status"),
+  guardianVaultSetup: (passphrase: string, authorize_runtime = true) =>
+    fetchJSON<{ token: string; status: GuardianVaultStatus; runtime_auto_unlock: boolean }>("/api/guardian/vault/setup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ passphrase, authorize_runtime }),
+    }),
+  guardianVaultUnlock: (passphrase: string, elevated = false) =>
+    fetchJSON<{ token: string; status: GuardianVaultStatus; elevated: boolean }>("/api/guardian/vault/unlock", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ passphrase, elevated }),
+    }),
+  guardianVaultLock: (token: string) =>
+    fetchJSON<{ ok: boolean; status: GuardianVaultStatus }>("/api/guardian/vault/lock", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+  guardianVaultCredentials: (token: string) =>
+    fetchJSON<{ credentials: GuardianVaultCredential[] }>("/api/guardian/vault/credentials", {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+  guardianVaultCreate: (token: string, body: {
+    label: string; kind: string; environment: string; username: string; secret: string;
+    url?: string; notes?: string; allowed_consumers?: string[]; approval?: string; rotated?: boolean;
+  }) =>
+    fetchJSON<GuardianVaultCredential>("/api/guardian/vault/credentials", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body),
+    }),
+  guardianVaultUpdate: (token: string, id: string, body: {
+    label: string; kind: string; environment: string; username: string; secret: string;
+    url?: string; notes?: string; allowed_consumers?: string[]; approval?: string; rotated?: boolean;
+  }) =>
+    fetchJSON<GuardianVaultCredential>(`/api/guardian/vault/credentials/${encodeURIComponent(id)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body),
+    }),
+  guardianVaultDelete: (token: string, id: string) =>
+    fetchJSON<{ ok: boolean }>(`/api/guardian/vault/credentials/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+  guardianVaultWithdraw: (token: string, id: string, body: {
+    consumer: string; purpose: string; environment: string; ttl_seconds?: number;
+  }) =>
+    fetchJSON<GuardianVaultWithdrawn>(`/api/guardian/vault/credentials/${encodeURIComponent(id)}/withdraw`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body),
+    }),
+  guardianVaultRevokeLease: (token: string, leaseId: string) =>
+    fetchJSON<{ ok: boolean }>(`/api/guardian/vault/leases/${encodeURIComponent(leaseId)}/revoke`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+  guardianVaultAudit: (token: string) =>
+    fetchJSON<{ audit: GuardianVaultAuditRow[] }>("/api/guardian/vault/audit", {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+  guardianVaultGeneratePassword: (length = 24) =>
+    fetchJSON<{ password: string }>(`/api/guardian/vault/generate-password?length=${length}`),
+
   // Cron jobs
   getCronJobs: (profile = "all") =>
     fetchJSON<CronJob[]>(`/api/cron/jobs?profile=${encodeURIComponent(profile)}`),
@@ -2364,6 +2431,54 @@ export interface GuardianWorkflowLaunch {
   mission: string;
   name?: string;
   profile?: string;
+}
+
+export interface GuardianVaultStatus {
+  configured: boolean;
+  unlocked: boolean;
+  credential_count: number;
+  runtime_auto_unlock: boolean;
+  db_path: string;
+  session_ttl_seconds: number;
+}
+
+export interface GuardianVaultCredential {
+  id: string;
+  label: string;
+  kind: string;
+  environment: "sandbox" | "production" | "other" | string;
+  url: string;
+  allowed_consumers: string[];
+  approval: "sandbox_auto" | "operator" | "master" | string;
+  active: boolean;
+  created_at: number;
+  updated_at: number;
+  last_used_at?: number | null;
+  last_rotated_at?: number | null;
+}
+
+export interface GuardianVaultAuditRow {
+  at: number;
+  action: string;
+  credential_id?: string | null;
+  label?: string | null;
+  consumer?: string | null;
+  purpose?: string | null;
+  result: string;
+  reason?: string | null;
+}
+
+export interface GuardianVaultWithdrawn {
+  lease_id: string;
+  credential_id: string;
+  label: string;
+  kind: string;
+  environment: string;
+  username: string;
+  secret: string;
+  url: string;
+  issued_at: number;
+  expires_at: number;
 }
 
 export interface CronJob {
