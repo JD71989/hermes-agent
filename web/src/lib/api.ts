@@ -748,6 +748,8 @@ export const api = {
     fetchJSON<{ ready: boolean; mode: string; message: string }>(`/api/guardian/vault/identity-factory/status`),
   guardianVaultWorkspaceStatus: () =>
     fetchJSON<GuardianWorkspaceCapabilities>(`/api/guardian/vault/workspace/status`),
+  guardianVaultGmailExternalStatus: () =>
+    fetchJSON<GuardianGmailExternalStatus>(`/api/guardian/vault/gmail-external/status`),
   guardianVaultWorkspaceCreateUser: (token: string, body: {
     service_credential_id: string; primary_email: string; given_name: string; family_name: string;
     password: string; customer_id?: string;
@@ -2618,6 +2620,20 @@ export interface GuardianWorkspaceCapabilities {
   anti_detection: boolean;
   phone_verification_bypass: boolean;
   bulk_unmanaged_accounts: boolean;
+  note: string;
+}
+
+export interface GuardianGmailExternalStatus {
+  name: string;
+  repository: string;
+  revision: string;
+  local_path: string;
+  downloaded: boolean;
+  execution: string;
+  consumer_gmail_creation: boolean;
+  phone_verification_bypass: boolean;
+  anti_detection: boolean;
+  proxy_rotation: boolean;
   note: string;
 }
 

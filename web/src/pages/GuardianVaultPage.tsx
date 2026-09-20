@@ -31,6 +31,7 @@ export default function GuardianVaultPage() {
   const [walletForm, setWalletForm] = useState({ label:"", provider:"native", wallet_type:"evm", chain:"ethereum", network:"sepolia", environment:"sandbox", purpose:"Guardian crypto wallet", approval:"sandbox_auto", allowed_consumers:"guardian", spend_limit:"0" });
   const [identityForm, setIdentityForm] = useState({ label:"", email:"", username:"", provider:"operator-controlled", mode:"mailbox", purpose:"Guardian identity", business_engine:"", agent_id:"", associated_wallet_id:"", recovery_email:"", status:"planned" });
   const [workspaceStatus, setWorkspaceStatus] = useState<"READY" | "CONNECTOR REQUIRED">("CONNECTOR REQUIRED");
+  const [gmailExternalStatus, setGmailExternalStatus] = useState("QUARANTINED");
   const [showSecret, setShowSecret] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -44,6 +45,7 @@ export default function GuardianVaultPage() {
   useEffect(() => {
     void api.guardianVaultStatus().then(setStatus);
     void api.guardianVaultWorkspaceStatus().then(r => setWorkspaceStatus(r.supported ? "READY" : "CONNECTOR REQUIRED")).catch(() => setWorkspaceStatus("CONNECTOR REQUIRED"));
+    void api.guardianVaultGmailExternalStatus().then(r => setGmailExternalStatus(r.downloaded ? "DOWNLOADED / QUARANTINED" : "NOT DOWNLOADED")).catch(() => setGmailExternalStatus("QUARANTINED"));
   }, []);
 
   async function initialize() {
@@ -240,7 +242,7 @@ export default function GuardianVaultPage() {
                 <div><h2 className="text-lg font-semibold">Google Workspace Mailbox Adapter</h2><p className="text-xs text-white/40">Controlled provisioning for a Google Workspace domain you own. Requires a Vault-held service credential with the Directory user scope; consumer Gmail automation, anti-detection and verification bypass are not enabled.</p></div>
                 <Badge text={workspaceStatus}/>
               </div>
-              <div className="mt-4 rounded-xl border border-white/10 bg-white/[.03] p-4 text-xs text-white/45">The linked Gmail Creator project is useful as a reference for automation concepts, but Guardian is not importing its bulk-account, anti-detection, proxy-rotation or phone-verification-bypass implementation. The supported path here is admin-controlled Workspace identity provisioning.</div>
+              <div className="mt-4 rounded-xl border border-white/10 bg-white/[.03] p-4 text-xs text-white/45">External Gmail Creator reference: <b className="text-white/65">{gmailExternalStatus}</b>. The downloaded project is isolated for audit/reference; Guardian does not execute or import its bulk-account, anti-detection, proxy-rotation or phone-verification-bypass implementation. The supported path here is admin-controlled Workspace identity provisioning.</div>
             </section>
 
             <section className="rounded-2xl border border-white/10 bg-black/30 p-6">
