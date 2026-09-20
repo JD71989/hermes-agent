@@ -30,6 +30,7 @@ export default function GuardianVaultPage() {
   const [withdrawn, setWithdrawn] = useState<GuardianVaultWithdrawn | null>(null);
   const [walletForm, setWalletForm] = useState({ label:"", provider:"native", wallet_type:"evm", chain:"ethereum", network:"sepolia", environment:"sandbox", purpose:"Guardian crypto wallet", approval:"sandbox_auto", allowed_consumers:"guardian", spend_limit:"0" });
   const [identityForm, setIdentityForm] = useState({ label:"", email:"", username:"", provider:"operator-controlled", mode:"mailbox", purpose:"Guardian identity", business_engine:"", agent_id:"", associated_wallet_id:"", recovery_email:"", status:"planned" });
+  const [workspaceStatus, setWorkspaceStatus] = useState<"READY" | "CONNECTOR REQUIRED">("CONNECTOR REQUIRED");
   const [showSecret, setShowSecret] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -42,6 +43,7 @@ export default function GuardianVaultPage() {
 
   useEffect(() => {
     void api.guardianVaultStatus().then(setStatus);
+    void api.guardianVaultWorkspaceStatus().then(r => setWorkspaceStatus(r.supported ? "READY" : "CONNECTOR REQUIRED")).catch(() => setWorkspaceStatus("CONNECTOR REQUIRED"));
   }, []);
 
   async function initialize() {
@@ -232,6 +234,14 @@ export default function GuardianVaultPage() {
 
             {walletSecret && <section className="rounded-2xl border border-white/10 bg-black/40 p-6"><h2 className="font-semibold">New Wallet — One-Time Recovery Window</h2><p className="mt-1 text-xs text-white/40">Store this recovery phrase offline. It will disappear automatically.</p><div className="mt-4 grid gap-3 md:grid-cols-2"><Secret label="RECOVERY PHRASE" value={walletSecret.recovery_phrase} onCopy={copy}/><Secret label="PRIVATE KEY" value={walletSecret.private_key} secret onCopy={copy}/></div></section>}
             {walletLease && <section className="rounded-2xl border border-white/10 bg-black/40 p-6"><div className="flex items-center justify-between"><div><h2 className="font-semibold">Wallet Signing Lease</h2><p className="text-xs text-white/35">{walletLease.address} · expires {time(walletLease.expires_at)}</p></div><Badge text={walletLease.recovery_phrase ? "ELEVATED EXPORT" : "SIGNING ACCESS"}/></div><div className="mt-4 grid gap-3 md:grid-cols-2"><Secret label="PRIVATE KEY" value={walletLease.private_key} secret onCopy={copy}/>{walletLease.recovery_phrase && <Secret label="RECOVERY PHRASE" value={walletLease.recovery_phrase} onCopy={copy}/>}</div></section>}
+
+            <section className="rounded-2xl border border-white/10 bg-black/30 p-6">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div><h2 className="text-lg font-semibold">Google Workspace Mailbox Adapter</h2><p className="text-xs text-white/40">Controlled provisioning for a Google Workspace domain you own. Requires a Vault-held service credential with the Directory user scope; consumer Gmail automation, anti-detection and verification bypass are not enabled.</p></div>
+                <Badge text={workspaceStatus}/>
+              </div>
+              <div className="mt-4 rounded-xl border border-white/10 bg-white/[.03] p-4 text-xs text-white/45">The linked Gmail Creator project is useful as a reference for automation concepts, but Guardian is not importing its bulk-account, anti-detection, proxy-rotation or phone-verification-bypass implementation. The supported path here is admin-controlled Workspace identity provisioning.</div>
+            </section>
 
             <section className="rounded-2xl border border-white/10 bg-black/30 p-6">
               <div className="mb-5 flex items-center gap-3"><div className="rounded-xl border border-white/10 bg-white/5 p-3"><UserRound size={20}/></div><div><h2 className="text-lg font-semibold">Identity Factory</h2><p className="text-xs text-white/40">Register legitimate mailboxes, aliases and service identities; external provider account creation stays connector-gated.</p></div></div>

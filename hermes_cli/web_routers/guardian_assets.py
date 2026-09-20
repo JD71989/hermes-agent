@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
-from agent.guardian import identities, wallets
+from agent.guardian import google_workspace, identities, wallets
 
 router = APIRouter(prefix="/api/guardian/vault", tags=["guardian-vault-assets"])
 
@@ -58,6 +58,15 @@ class IdentityCreate(BaseModel):
 
 class IdentityStatus(BaseModel):
     status: str
+
+
+class WorkspaceProvision(BaseModel):
+    service_credential_id: str
+    primary_email: str
+    given_name: str
+    family_name: str
+    password: str
+    customer_id: str = "my_customer"
 
 
 def _call(fn, *args, **kwargs):
@@ -116,3 +125,13 @@ def identity_status(request: Request, identity_id: str, body: IdentityStatus):
 @router.get("/identity-factory/status")
 def identity_factory_status():
     return identities.provisionability()
+
+
+@router.get("/workspace/status")
+def workspace_status():
+    return google_workspace.capabilities()
+
+
+@router.post("/workspace/users")
+def workspace_create_user(request: Request, body: WorkspaceProvision):
+    return _call(google_workspace.provision_user, _token(request), **body.model_dump())

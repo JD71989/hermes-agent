@@ -746,6 +746,20 @@ export const api = {
     }),
   guardianVaultIdentityFactoryStatus: () =>
     fetchJSON<{ ready: boolean; mode: string; message: string }>(`/api/guardian/vault/identity-factory/status`),
+  guardianVaultWorkspaceStatus: () =>
+    fetchJSON<GuardianWorkspaceCapabilities>(`/api/guardian/vault/workspace/status`),
+  guardianVaultWorkspaceCreateUser: (token: string, body: {
+    service_credential_id: string; primary_email: string; given_name: string; family_name: string;
+    password: string; customer_id?: string;
+  }) =>
+    fetchJSON<{ id: string; primary_email: string; status: string; customer_id: string }>(
+      `/api/guardian/vault/workspace/users`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body),
+      },
+    ),
 
   // Cron jobs
   getCronJobs: (profile = "all") =>
@@ -2593,6 +2607,18 @@ export interface GuardianIdentity {
   status: string;
   created_at: number;
   updated_at: number;
+}
+
+export interface GuardianWorkspaceCapabilities {
+  provider: string;
+  supported: boolean;
+  mode: string;
+  scope: string;
+  consumer_gmail_creation: boolean;
+  anti_detection: boolean;
+  phone_verification_bypass: boolean;
+  bulk_unmanaged_accounts: boolean;
+  note: string;
 }
 
 export interface CronJob {
