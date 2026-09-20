@@ -37,6 +37,7 @@ def provision_user(
     primary_email: str,
     given_name: str,
     family_name: str,
+    admin_email: str = "",
     password: str = "",
     customer_id: str = "my_customer",
 ) -> dict[str, Any]:
@@ -62,10 +63,12 @@ def provision_user(
     except ImportError as exc:
         raise RuntimeError("Google Workspace dependencies are not installed. Use the existing google Hermes extra.") from exc
 
+    if not admin_email or "@" not in admin_email:
+        raise ValueError("A Workspace admin email is required for service-account delegation.")
     credentials = service_account.Credentials.from_service_account_info(
         info,
         scopes=[ADMIN_SCOPE],
-    )
+    ).with_subject(admin_email.strip().lower())
     directory = build("admin", "directory_v1", credentials=credentials, cache_discovery=False)
     body = build_user_payload(
         primary_email=primary_email,
@@ -74,6 +77,20 @@ def provision_user(
         password=password,
     )
     result = directory.users().insert(customer=customer_id, body=body).execute()
+    verified = False
+    verification_error = ""
+    try:
+        verification = directory.users().get(
+            customer=customer_id,
+            userKey=result.get("primaryEmail", primary_email),
+        ).execute()
+        verified = (
+            verification.get("id") == result.get("id")
+            and verification.get("primaryEmail", "").lower()
+            == result.get("primaryEmail", primary_email).lower()
+        )
+    except Exception as exc:
+        verification_error = str(exc)
     vault._audit(
         "google_workspace_create_user",
         result="success",
@@ -88,6 +105,8 @@ def provision_user(
         "primary_email": result.get("primaryEmail", primary_email),
         "status": "active" if not result.get("suspended") else "suspended",
         "customer_id": customer_id,
+        "verified": verified,
+        "verification_error": verification_error,
     }
 
 

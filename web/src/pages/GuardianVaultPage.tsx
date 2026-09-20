@@ -32,6 +32,8 @@ export default function GuardianVaultPage() {
   const [identityForm, setIdentityForm] = useState({ label:"", email:"", username:"", provider:"operator-controlled", mode:"mailbox", purpose:"Guardian identity", business_engine:"", agent_id:"", associated_wallet_id:"", recovery_email:"", status:"planned" });
   const [workspaceStatus, setWorkspaceStatus] = useState<"READY" | "CONNECTOR REQUIRED">("CONNECTOR REQUIRED");
   const [gmailExternalStatus, setGmailExternalStatus] = useState("QUARANTINED");
+  const [workspaceForm, setWorkspaceForm] = useState({ service_credential_id:"", admin_email:"", label:"", primary_email:"", username:"", given_name:"", family_name:"", business_engine:"", agent_id:"", recovery_email:"", purpose:"Guardian Workspace identity", customer_id:"my_customer" });
+  const [workspaceResult, setWorkspaceResult] = useState("");
   const [showSecret, setShowSecret] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -119,6 +121,31 @@ export default function GuardianVaultPage() {
   async function disableWallet(id:string) {
     if (!token || !window.confirm("Deactivate this wallet?")) return;
     setBusy(true); try { await api.guardianVaultDeleteWallet(token,id); await refresh(); setMessage("Wallet deactivated."); } catch(e) { setMessage(e instanceof Error ? e.message : "Wallet deactivation failed."); } finally { setBusy(false); }
+  }
+
+  async function provisionWorkspaceIdentity() {
+    if (!token || !elevated) {
+      setMessage("Unlock an elevated Vault session before provisioning a Workspace user.");
+      return;
+    }
+    const f = workspaceForm;
+    if (!f.service_credential_id || !f.admin_email || !f.label || !f.primary_email || !f.username || !f.given_name || !f.family_name) {
+      setMessage("Service credential, admin email, identity details and names are required.");
+      return;
+    }
+    setBusy(true);
+    setWorkspaceResult("");
+    try {
+      const r = await api.guardianVaultWorkspaceCreateUser(token, f);
+      setWorkspaceResult(r.message + (r.credential_id ? " Credential: " + r.credential_id : ""));
+      setMessage(r.ready_for_automation ? "Workspace identity is active and ready for automation." : "Workspace identity needs operator attention.");
+      setWorkspaceForm(v=>({...v,label:"",primary_email:"",username:"",given_name:"",family_name:""}));
+      await refresh();
+    } catch(e) {
+      setMessage(e instanceof Error ? e.message : "Workspace provisioning failed.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function createIdentity() {
@@ -243,6 +270,24 @@ export default function GuardianVaultPage() {
                 <Badge text={workspaceStatus}/>
               </div>
               <div className="mt-4 rounded-xl border border-white/10 bg-white/[.03] p-4 text-xs text-white/45">External Gmail Creator reference: <b className="text-white/65">{gmailExternalStatus}</b>. The downloaded project is isolated for audit/reference; Guardian does not execute or import its bulk-account, anti-detection, proxy-rotation or phone-verification-bypass implementation. The supported path here is admin-controlled Workspace identity provisioning.</div>
+            </section>
+
+            <section className="rounded-2xl border border-white/10 bg-black/30 p-6">
+              <div className="mb-5 flex items-center gap-3"><div className="rounded-xl border border-white/10 bg-white/5 p-3"><ShieldCheck size={20}/></div><div><h2 className="text-lg font-semibold">Workspace Provisioning</h2><p className="text-xs text-white/40">One user at a time: Vault generates and stores the password, Google Workspace creates the account in your controlled domain, then Guardian verifies it before automation access.</p></div></div>
+              <div className="grid gap-3">
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div><div className="mb-1 text-[10px] text-white/30">VAULT SERVICE ACCOUNT</div><select value={workspaceForm.service_credential_id} onChange={e=>setWorkspaceForm(f=>({...f,service_credential_id:e.target.value}))} className="field"><option value="">Select production service-account credential</option>{credentials.filter(c=>c.environment==="production").map(c=><option key={c.id} value={c.id}>{c.label} · {c.kind} · {c.id}</option>)}</select></div>
+                  <Input value={workspaceForm.admin_email} onChange={v=>setWorkspaceForm(f=>({...f,admin_email:v}))} placeholder="Delegated Workspace admin email"/>
+                </div>
+                <div className="grid gap-3 md:grid-cols-2"><Input value={workspaceForm.label} onChange={v=>setWorkspaceForm(f=>({...f,label:v}))} placeholder="Identity label"/><Input value={workspaceForm.primary_email} onChange={v=>setWorkspaceForm(f=>({...f,primary_email:v}))} placeholder="New Workspace email"/></div>
+                <div className="grid gap-3 md:grid-cols-2"><Input value={workspaceForm.username} onChange={v=>setWorkspaceForm(f=>({...f,username:v}))} placeholder="Username"/><Input value={workspaceForm.recovery_email} onChange={v=>setWorkspaceForm(f=>({...f,recovery_email:v}))} placeholder="Recovery email (optional)"/></div>
+                <div className="grid gap-3 md:grid-cols-2"><Input value={workspaceForm.given_name} onChange={v=>setWorkspaceForm(f=>({...f,given_name:v}))} placeholder="Given name"/><Input value={workspaceForm.family_name} onChange={v=>setWorkspaceForm(f=>({...f,family_name:v}))} placeholder="Family name"/></div>
+                <div className="grid gap-3 md:grid-cols-2"><Input value={workspaceForm.business_engine} onChange={v=>setWorkspaceForm(f=>({...f,business_engine:v}))} placeholder="Business engine (optional)"/><Input value={workspaceForm.agent_id} onChange={v=>setWorkspaceForm(f=>({...f,agent_id:v}))} placeholder="Agent ID (optional)"/></div>
+                <div className="grid gap-3 md:grid-cols-2"><Input value={workspaceForm.purpose} onChange={v=>setWorkspaceForm(f=>({...f,purpose:v}))} placeholder="Purpose"/><Input value={workspaceForm.customer_id} onChange={v=>setWorkspaceForm(f=>({...f,customer_id:v}))} placeholder="Customer ID (default: my_customer)"/></div>
+                <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/45">Password is generated on Guardian's backend and stored encrypted in Vault. Provisioning requires an elevated Vault session and a Vault-held Google service-account credential with domain-wide delegation.</div>
+                <button disabled={busy || !elevated} onClick={provisionWorkspaceIdentity} className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm disabled:opacity-40"><ShieldCheck size={16}/> PROVISION + VERIFY + ACTIVATE</button>
+                {workspaceResult && <div className="rounded-lg border border-white/10 bg-white/[.03] px-3 py-2 text-xs text-white/55">{workspaceResult}</div>}
+              </div>
             </section>
 
             <section className="rounded-2xl border border-white/10 bg-black/30 p-6">

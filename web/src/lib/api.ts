@@ -751,10 +751,16 @@ export const api = {
   guardianVaultGmailExternalStatus: () =>
     fetchJSON<GuardianGmailExternalStatus>(`/api/guardian/vault/gmail-external/status`),
   guardianVaultWorkspaceCreateUser: (token: string, body: {
-    service_credential_id: string; primary_email: string; given_name: string; family_name: string;
-    password: string; customer_id?: string;
+    service_credential_id: string; admin_email: string; label: string; primary_email: string;
+    username: string; given_name: string; family_name: string; business_engine?: string;
+    agent_id?: string; associated_wallet_id?: string | null; recovery_email?: string;
+    purpose?: string; password?: string; customer_id?: string;
   }) =>
-    fetchJSON<{ id: string; primary_email: string; status: string; customer_id: string }>(
+    fetchJSON<{
+      ok: boolean; ready_for_automation: boolean; identity?: GuardianIdentity;
+      identity_id?: string; credential_id: string; primary_email: string; verified: boolean;
+      password_generated: boolean; message: string;
+    }>(
       `/api/guardian/vault/workspace/users`,
       {
         method: "POST",
@@ -2606,6 +2612,7 @@ export interface GuardianIdentity {
   agent_id: string;
   associated_wallet_id?: string | null;
   recovery_email: string;
+  credential_id?: string | null;
   status: string;
   created_at: number;
   updated_at: number;

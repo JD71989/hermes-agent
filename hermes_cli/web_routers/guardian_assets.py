@@ -62,10 +62,18 @@ class IdentityStatus(BaseModel):
 
 class WorkspaceProvision(BaseModel):
     service_credential_id: str
+    admin_email: str
+    label: str
     primary_email: str
+    username: str
     given_name: str
     family_name: str
-    password: str
+    business_engine: str = ""
+    agent_id: str = ""
+    associated_wallet_id: str | None = None
+    recovery_email: str = ""
+    purpose: str = "Guardian Workspace identity"
+    password: str = ""
     customer_id: str = "my_customer"
 
 
@@ -139,4 +147,4 @@ def workspace_status():
 
 @router.post("/workspace/users")
 def workspace_create_user(request: Request, body: WorkspaceProvision):
-    return _call(google_workspace.provision_user, _token(request), **body.model_dump())
+    return _call(identities.provision_workspace_identity, _token(request), **body.model_dump())
