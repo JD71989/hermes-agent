@@ -300,12 +300,6 @@ class EconomicKernel:
         job_id = f"econ-{uuid.uuid4().hex[:12]}"
         key = idempotency_key or f"{action_type}-{job_id}"
 
-        # Check for duplicate idempotency key
-        for existing in self._jobs.values():
-            if existing.idempotency_key == key and existing.status == "completed":
-                logger.info("Duplicate idempotent job detected: %s", key)
-                return existing
-
         expected_profit = expected_revenue - estimated_cost
         margin_pct = ((expected_profit / expected_revenue) * 100) if expected_revenue > 0 else 0
         roi_pct = ((expected_profit / estimated_cost) * 100) if estimated_cost > 0 else 0
@@ -324,6 +318,10 @@ class EconomicKernel:
         )
 
         with self._lock:
+            for existing in self._jobs.values():
+                if existing.idempotency_key == key:
+                    logger.info("Duplicate idempotent job detected: %s", key)
+                    return existing
             self._jobs[job_id] = job
         self._save_state()
 
