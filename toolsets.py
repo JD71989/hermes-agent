@@ -126,6 +126,10 @@ TOOLSETS = {
     "todo": _ts("Task planning and tracking for multi-step work", ["todo_list"]),
     "memory": _ts("Persistent memory across sessions (personal notes + user profile)", ["memory"]),
     "context_engine": _ts("Runtime tools exposed by the active context engine"),
+    "bond": _ts(
+        "Bond revenue and lead pipeline — UK/AU qualified-lead workflow; requires BOND_API_KEY.",
+        ["bond_revenue"],
+    ),
     "session_search": _ts("Search and recall past conversations with summarization", ["session_search"]),
     "connections": _ts("Remote connector discovery, execution, and account authorization", ["manage_connections"]),
     "project": _ts("Desktop Projects — create/switch named workspaces (GUI sessions only)", ["desktop_project"]),

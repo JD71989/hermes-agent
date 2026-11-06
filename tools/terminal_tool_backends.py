@@ -241,6 +241,11 @@ def _create_environment(env_type: str, image: str, cwd: str, timeout: int,
     the host dir bound into Docker when cwd mounting is enabled. ``probe_only`` asks ssh for a throwaway
     connection with no remote setup/sync (the prompt-time probe). Unknown types fall through to plugin backends."""
     builder = _ENV_BUILDERS.get(env_type, _build_plugin_env)
+    # functools.partial builders (singularity/daytona/vercel) pre-bind env_type
+    # as positional; do not pass it again as keyword.
+    if isinstance(builder, functools.partial):
+        return builder(image=image, cwd=cwd, timeout=timeout, cc=container_config or {},
+                       task_id=task_id, ssh_config=ssh_config, host_cwd=host_cwd, probe_only=probe_only)
     return builder(env_type=env_type, image=image, cwd=cwd, timeout=timeout, cc=container_config or {},
                    task_id=task_id, ssh_config=ssh_config, host_cwd=host_cwd, probe_only=probe_only)
 

@@ -188,7 +188,8 @@ def assemble_api_request(
     # Build the request-local cache sections LAST, after every transcript mutation;
     # the canonical tool registry stays undecorated. Marked ``content`` becomes text
     # blocks the whitespace pass skips, so the same row's bytes vary across turns.
-    tools_for_api = agent.tools
+    # OLMoE/Colibri rejects OpenAI tool declarations; keep Hermes tools local but omit them on this inference wire.
+    tools_for_api = [] if (agent.provider == "custom" and (agent.model or "").strip().lower() == "olmoe-colibri") else agent.tools
     if agent._use_prompt_caching and agent.provider != "moa":
         from agent.prompt_caching import envelope_tool_part_cache_markers_supported
 

@@ -471,12 +471,18 @@ def optimise_pipeline(
     Analyzes pipeline performance and returns optimization suggestions.
 
     Args:
-        state: Current pipeline state
+        state: Current pipeline state (dict with "leads" key containing
+               either a list of lead dicts or a dict keyed by lead_id).
 
     Returns:
         Optimization suggestions dict
     """
-    leads = state.get("leads", [])
+    leads_val = state.get("leads", [])
+    # Handle both list format and dict-keyed-by-lead_id format
+    if isinstance(leads_val, dict):
+        leads = list(leads_val.values())
+    else:
+        leads = leads_val
     if not leads:
         return {"suggestions": [], "summary": "No leads to analyze"}
 

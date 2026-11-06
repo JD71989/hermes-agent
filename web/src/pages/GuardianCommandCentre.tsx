@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Activity, ArrowUpRight, Bot, BriefcaseBusiness, ChevronRight,
-  CircleDashed, Clock3, Code2, Database, Globe2, Layers3, LockKeyhole,
-  Cpu, Network, Pause, Play, Radar, RefreshCw, Rocket, Server, ShieldCheck,
+  CircleDashed, Clock3, Code2, Database, Globe2, Layers3, Lightbulb, LockKeyhole,
+  Bug, Cpu, Network, Pause, Play, Radar, RefreshCw, Rocket, Search, Server, ShieldCheck,
   Terminal, Workflow, Zap, type LucideIcon,
 } from "lucide-react";
 import { api, type CronJob, type EnvVarInfo, type GuardianWorkflow, type StatusResponse } from "@/lib/api";
@@ -79,6 +79,7 @@ export default function GuardianCommandCentre() {
   const [cpuHistory, setCpuHistory] = useState<number[]>([]);
   const [ramHistory, setRamHistory] = useState<number[]>([]);
   const [command, setCommand] = useState("");
+  const [ideaPrompt, setIdeaPrompt] = useState("");
   const [busy, setBusy] = useState(false);
   const lastSignature = useRef("");
 
@@ -155,6 +156,25 @@ export default function GuardianCommandCentre() {
     } finally { setCommand(""); setBusy(false); }
   }
 
+  async function runIdea(prompt: string) {
+    const v = prompt.trim();
+    if (!v) return;
+    setBusy(true);
+    try {
+      const workflow = await api.launchGuardianWorkflow({
+        engine: "general",
+        name: "Guardian Idea · " + v.slice(0, 42),
+        mission: "Validate this business idea from first principles: " + v,
+        profile: "default",
+      });
+      setIdeaPrompt("");
+      setTab("automation");
+      event("Idea validation launched · " + workflow.id, "live");
+    } catch {
+      event("Idea validation failed", "warn");
+    } finally { setBusy(false); }
+  }
+
   async function runEngine(engineId: string, engineName: string, description: string) {
     setBusy(true);
     try {
@@ -223,7 +243,7 @@ export default function GuardianCommandCentre() {
         <div className="guardian-body">
           <Rail tab={tab} setTab={setTab} />
           <section className="guardian-main">
-            {tab === "mission" && <Mission node={node} status={status} jobs={jobs} events={events} sessions={sessionsCount} activeJobs={activeJobs} cpuHistory={cpuHistory} ramHistory={ramHistory} />}
+            {tab === "mission" && <Mission busy={busy} node={node} status={status} jobs={jobs} events={events} sessions={sessionsCount} activeJobs={activeJobs} cpuHistory={cpuHistory} ramHistory={ramHistory} ideaPrompt={ideaPrompt} setIdeaPrompt={setIdeaPrompt} onRunIdea={runIdea} onOpenBounties={() => { setCommand("Research legitimate public bug bounty programs and identify qualifying targets for review"); setTab("automation"); void runCommand("Research legitimate public bug bounty programs and identify qualifying targets for review"); }} />}
             {tab === "engines" && <Engines rows={engineRows} env={env} busy={busy} onLaunch={runEngine} />}
             {tab === "agents" && <Agents sessions={sessions} skills={skills} />}
             {tab === "automation" && <Automation jobs={jobs} workflows={workflows} busy={busy} onRun={runJob} onWorkflowAction={workflowAction} />}
@@ -269,7 +289,7 @@ function Hero({command,setCommand,busy,onRun,onTab,node,status,sessions}:{comman
     <div className="g-metrics">{metrics.map(([label,value,detail])=><div className="g-metric" key={label}><small>{label}</small><b>{value}</b><span>{detail}</span></div>)}</div>
   </section>;
 }
-function Quick({text,icon:Icon,onClick}:{text:string;icon:LucideIcon;onClick:()=>void}) { return <button className="g-quick" onClick={onClick}><Icon/>{text}</button>; }
+function Quick({text,icon:Icon,onClick}:{text:string;icon:LucideIcon;onClick:()=>void}) { return <button className="g-quick-btn" onClick={onClick}><Icon/>{text}</button>; }
 
 function Rail({tab,setTab}:{tab:TabKey;setTab:(v:TabKey)=>void}) {
   return <nav className="g-rail"><div className="g-rail-label">COMMAND</div>{tabs.map(([key,label,Icon])=><button className={cn("g-nav",tab===key&&"active")} key={key} onClick={()=>setTab(key)}><Icon/><span>{label}</span><ChevronRight/></button>)}<div className="g-rail-line"/><div className="g-rail-label">DEPARTMENTS</div>{departments.map(([label,desc,Icon])=><div className="g-dept" key={label} title={desc}><Icon/><span>{label}</span></div>)}</nav>;
@@ -282,8 +302,26 @@ function Stat({label,value}:{label:string;value:string}) { return <div className
 function State({text,good=false}:{text:string;good?:boolean}) { return <span className={cn("g-state",good?"good":"gate")}>{text}</span>; }
 function Empty({text}:{text:string}) { return <div className="g-empty"><CircleDashed/><span>{text}</span></div>; }
 
-function Mission({node,status,jobs,events,sessions,activeJobs,cpuHistory,ramHistory}:{node:NodeStats|null;status:StatusResponse|null;jobs:CronJob[];events:FeedEvent[];sessions:number;activeJobs:number;cpuHistory:number[];ramHistory:number[]}) {
+function Mission({busy,node,status,jobs,events,sessions,activeJobs,cpuHistory,ramHistory,ideaPrompt,setIdeaPrompt,onRunIdea,onOpenBounties}:{busy:boolean;node:NodeStats|null;status:StatusResponse|null;jobs:CronJob[];events:FeedEvent[];sessions:number;activeJobs:number;cpuHistory:number[];ramHistory:number[];ideaPrompt:string;setIdeaPrompt:(v:string)=>void;onRunIdea:(v:string)=>void;onOpenBounties:()=>void}) {
   return <div className="g-stack">
+    <div className="g-action-grid">
+      <Panel title="Idea Prompt" sub="Turn a raw idea into a validation workflow" icon={Lightbulb}>
+        <div className="g-idea-box">
+          <textarea value={ideaPrompt} onChange={e=>setIdeaPrompt(e.target.value)} placeholder="Describe the opportunity, problem, product or revenue idea…" rows={3}/>
+          <div className="g-idea-footer">
+            <span>IDEA → VALIDATE → PLAN → BUILD</span>
+            <button onClick={()=>onRunIdea(ideaPrompt)} disabled={busy || !ideaPrompt.trim()}><Rocket/> VALIDATE IDEA</button>
+          </div>
+        </div>
+      </Panel>
+      <Panel title="Bug Bounty Radar" sub="Legitimate public-program discovery and research" icon={Bug}>
+        <div className="g-bounty-card">
+          <div className="g-bounty-icon"><Search/></div>
+          <div><b>BOUNTY DISCOVERY</b><small>Find public programs, scope, rules and qualifying targets. No automated testing or submission is performed from this panel.</small></div>
+          <button onClick={onOpenBounties}><ArrowUpRight/> OPEN RADAR</button>
+        </div>
+      </Panel>
+    </div>
     <div className="g-grid-2">
       <Panel title="Guardian Network" sub="Observed runtime topology" icon={Network}>
         <div className="g-network"><div className="g-ring r1"/><div className="g-ring r2"/><div className="g-core"><ShieldCheck/><b>GUARDIAN01</b><small>{node?"ONLINE":"WAITING"}</small></div><div className="g-node n1"><Bot/>HERMES</div><div className="g-node n2"><Zap/>COLIBRÌ</div><div className="g-node n3"><Globe2/>TOOLS</div><div className="g-wire w1"/><div className="g-wire w2"/><div className="g-wire w3"/></div>
@@ -415,7 +453,7 @@ const css=String.raw`
 .g-hero{position:relative;min-height:530px;margin-top:14px;overflow:hidden;border:1px solid rgba(255,255,255,.08);background:#030609;box-shadow:0 25px 100px rgba(0,0,0,.38)}.g-hero-art{position:absolute;inset:-3%;background:url("/guardian01-live.png") center/cover no-repeat;filter:brightness(.42) contrast(1.14) saturate(.72);animation:heroDrift 18s ease-in-out infinite alternate}.g-hero-overlay{position:absolute;inset:0;background:radial-gradient(circle at 52% 23%,transparent 7%,rgba(2,4,7,.22) 42%,rgba(2,4,7,.92) 100%),linear-gradient(90deg,rgba(2,4,7,.86),rgba(2,4,7,.20) 54%,rgba(2,4,7,.68))}
 .g-hero-copy{position:relative;z-index:1;max-width:980px;padding:42px 42px 18px}.g-chip{display:inline-flex;padding:8px 10px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.28);color:#a9ebcc;font-size:7px;letter-spacing:.18em}.g-hero-copy h2{margin-top:25px;font-size:clamp(48px,6.4vw,96px);line-height:.88;letter-spacing:-.06em;font-weight:770}.g-hero-copy h2 span{color:#ffb579}.g-hero-copy p{max-width:720px;margin-top:17px;font-size:12px;line-height:1.75;color:rgba(255,255,255,.48)}
 .g-command{display:flex;align-items:center;gap:9px;max-width:760px;margin-top:22px;padding:10px;border:1px solid rgba(255,255,255,.11);background:rgba(0,0,0,.4)}.g-command svg{width:16px;color:#ffb579}.g-command input{min-width:0;flex:1;border:0;outline:0;background:transparent;color:#fff;font:11px ui-monospace,Consolas,monospace}.g-command input::placeholder{color:rgba(255,255,255,.22)}.g-command button{border:1px solid rgba(255,156,95,.28);background:rgba(255,125,36,.10);color:#ffc294;padding:8px 13px;font-size:8px;letter-spacing:.17em}
-.g-quick{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.g-quick{display:flex}.g-quick>button{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.025);padding:9px 10px;color:rgba(255,255,255,.48);font-size:7px;letter-spacing:.15em}.g-quick svg{width:12px}
+.g-quick{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.g-quick-btn{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.025);padding:9px 10px;color:rgba(255,255,255,.48);font-size:7px;letter-spacing:.15em}.g-quick-btn svg{width:12px}.g-quick-btn:hover{border-color:rgba(255,157,93,.3);background:rgba(255,125,35,.09);color:#fff}
 .g-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;position:relative;z-index:1;padding:0 42px 28px}.g-metric{padding:12px;border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.28);backdrop-filter:blur(10px)}.g-metric small,.g-metric span{display:block}.g-metric small{font-size:6px;color:rgba(255,255,255,.3)}.g-metric b{display:block;margin-top:6px;font:22px ui-monospace,Consolas,monospace}.g-metric span{margin-top:4px;font-size:6px;color:rgba(255,255,255,.23)}
 .guardian-body{display:grid;grid-template-columns:235px minmax(0,1fr);gap:14px;margin-top:14px}.g-rail{position:sticky;top:12px;align-self:start;padding:8px;border:1px solid rgba(255,255,255,.08);background:rgba(3,6,9,.73);backdrop-filter:blur(13px)}.g-rail-label{padding:9px 10px 7px;font-size:6px;color:rgba(255,255,255,.24)}.g-nav{display:flex;align-items:center;gap:9px;width:100%;padding:10px;border:1px solid transparent;background:transparent;color:rgba(255,255,255,.4);text-align:left;font-size:8px;letter-spacing:.13em}.g-nav svg{width:13px}.g-nav svg:last-child{margin-left:auto;width:11px;opacity:.28}.g-nav.active,.g-nav:hover{border-color:rgba(255,156,95,.2);background:rgba(255,127,35,.08);color:#ffe3d0}.g-rail-line{height:1px;margin:7px 0;background:rgba(255,255,255,.05)}.g-dept{display:flex;align-items:center;gap:8px;padding:8px 10px;color:rgba(255,255,255,.28);font-size:7px}.g-dept svg{width:12px;color:#ffb579}
 .g-content,.g-stack{min-width:0}.g-stack{display:grid;gap:14px}.g-grid-2{display:grid;grid-template-columns:1.15fr .85fr;gap:14px}.g-panel{padding:16px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.012));box-shadow:inset 0 1px rgba(255,255,255,.03),0 18px 70px rgba(0,0,0,.22);backdrop-filter:blur(13px)}.g-panel-head{display:flex;gap:10px;align-items:flex-start;margin-bottom:13px}.g-panel-icon{width:29px;height:29px;display:grid;place-items:center;border:1px solid rgba(255,155,94,.2);color:#ffb579}.g-panel-icon svg{width:14px}.g-panel-head h3{margin:2px 0 0;font-size:9px}.g-panel-head p{margin-top:4px;font-size:6px;color:rgba(255,255,255,.25)}
@@ -431,6 +469,7 @@ const css=String.raw`
 .g-workflow-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.g-workflow-grid>div{padding:12px;border:1px solid rgba(255,255,255,.06)}.g-workflow-grid b,.g-workflow-grid span{display:block}.g-workflow-grid b{font-size:7px;letter-spacing:.14em}.g-workflow-grid span{margin-top:6px;font-size:6px;line-height:1.5;color:rgba(255,255,255,.25)}.g-workflow-grid button{margin-top:9px;padding:7px 9px;border:1px solid rgba(255,156,96,.22);background:rgba(255,127,36,.06);color:#ffc08f;font-size:6px;letter-spacing:.13em}
 .g-tool-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.g-tool{display:flex;align-items:center;gap:8px;padding:9px;border:1px solid rgba(255,255,255,.06)}.g-tool-icon{width:27px;height:27px;display:grid;place-items:center;border:1px solid rgba(255,156,96,.18);color:#ffb77e}.g-tool-icon svg{width:12px}.g-tool b,.g-tool small{display:block}.g-tool b{font-size:7px}.g-tool small{margin-top:3px;font-size:6px;color:rgba(255,255,255,.22)}.g-security{display:grid;grid-template-columns:repeat(2,1fr);gap:2px 10px}.g-audit{display:grid;gap:6px}.g-audit p{margin:0;padding:9px;border:1px solid rgba(255,255,255,.06);font-size:7px;color:rgba(255,255,255,.27)}
 .g-empty{display:flex;align-items:center;justify-content:center;gap:7px;padding:26px;color:rgba(255,255,255,.23);font-size:7px}.g-empty svg{width:13px}
+.g-action-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:14px}.g-idea-box{border:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.16);padding:10px}.g-idea-box textarea{width:100%;resize:vertical;min-height:78px;border:1px solid rgba(255,255,255,.07);background:rgba(0,0,0,.28);color:#fff;padding:10px;outline:none;font:10px/1.6 ui-monospace,Consolas,monospace}.g-idea-box textarea::placeholder{color:rgba(255,255,255,.22)}.g-idea-box textarea:focus{border-color:rgba(255,157,93,.35);box-shadow:0 0 22px rgba(255,127,36,.06)}.g-idea-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px}.g-idea-footer span{font-size:6px;letter-spacing:.13em;color:rgba(255,255,255,.23)}.g-idea-footer button,.g-bounty-card button{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(255,156,95,.22);background:rgba(255,127,36,.07);color:#ffc08f;padding:8px 10px;font-size:6px;letter-spacing:.13em}.g-idea-footer button:disabled{opacity:.35;cursor:not-allowed}.g-idea-footer svg,.g-bounty-card svg{width:11px}.g-bounty-card{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;padding:11px;border:1px solid rgba(255,255,255,.06);background:linear-gradient(135deg,rgba(255,127,35,.035),rgba(0,0,0,.16))}.g-bounty-icon{width:34px;height:34px;display:grid;place-items:center;border:1px solid rgba(255,156,95,.2);color:#ffb77e}.g-bounty-card b,.g-bounty-card small{display:block}.g-bounty-card b{font-size:7px;letter-spacing:.14em}.g-bounty-card small{margin-top:5px;font-size:6px;line-height:1.5;color:rgba(255,255,255,.25)}.g-bounty-card button{grid-column:2;justify-self:start}
 button{transition:background .16s ease,border-color .16s ease,color .16s ease,transform .16s ease}.g-icon:hover,.g-command button:hover,.g-quick>button:hover,.g-job-side button:hover,.g-plugin-side button:hover{border-color:rgba(255,157,93,.24);background:rgba(255,125,35,.08);color:#fff}
 button:focus-visible,input:focus-visible{outline:2px solid #ffb27e;outline-offset:2px}
 @keyframes ambient{to{transform:translate3d(2%,1%,0) scale(1.05)}}@keyframes gridMove{to{background-position:56px 56px,56px 56px}}@keyframes scan{to{transform:translateY(740%)}}@keyframes heroDrift{to{transform:scale(1.07) translate3d(.5%,-.4%,0)}}@keyframes spin{to{transform:rotate(360deg)}}@keyframes orbit{to{transform:rotate(360deg) translateX(9px) rotate(-360deg)}}

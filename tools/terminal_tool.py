@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Terminal tool: run shell commands in the configured backend.
+"""Terminal tool: run shell commas in the configured backend.
 
 Backends (``TERMINAL_ENV``): local (default), docker, singularity, modal
 (direct or managed gateway), daytona, vercel_sandbox, ssh, plus
