@@ -25,6 +25,20 @@ const BUILTIN_LITERAL: Record<string, string> = {
   "/webhooks": "Webhooks",
   "/pairing": "Pairing",
   "/system": "System",
+  // Guardian surfaces. One sidebar entry (/guardian) hosts an in-page tab
+  // strip, so these paths resolve their own titles rather than reusing it.
+  "/guardian": "Guardian Command Centre",
+  "/guardian/vault": "Guardian Vault",
+  "/guardian/revenue": "Guardian Business & Revenue",
+  "/guardian/commercial": "Guardian Commercial",
+  "/guardian/marketing": "Guardian Marketing",
+  "/guardian/creators": "Guardian Media & Creators",
+  "/guardian/crypto": "Guardian Crypto",
+  "/guardian/trading": "Guardian Trading",
+  "/guardian/intelligence": "Guardian Intelligence",
+  "/guardian/cyberlab": "Guardian CyberLab",
+  "/guardian/automation": "Guardian Automation",
+  "/guardian/system": "Guardian System Admin",
 };
 
 export function resolvePageTitle(

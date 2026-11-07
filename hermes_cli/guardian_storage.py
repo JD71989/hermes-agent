@@ -20,6 +20,7 @@ import logging
 import os
 import shutil
 import sqlite3
+import stat
 import sys
 import time
 import zipfile
@@ -316,18 +317,44 @@ def _probe_location(loc: StorageLocation) -> None:
         loc.failure_detail = "Path exists but is not writable"
 
 
-def _dir_size(path: Path) -> int:
-    """Calculate total size of a directory. Best-effort, returns 0 on error."""
-    total = 0
+def _is_reparse_point(entry: os.DirEntry) -> bool:
+    """True for junctions/mount points, which must never be walked through."""
     try:
-        for entry in path.rglob("*"):
-            try:
-                if entry.is_file() and not entry.is_symlink():
-                    total += entry.stat().st_size
-            except (OSError, ValueError):
-                continue
-    except (OSError, ValueError):
-        return 0
+        attrs = getattr(entry.stat(follow_symlinks=False), "st_file_attributes", 0)
+    except OSError:
+        return False
+    return bool(attrs & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0))
+
+
+def _dir_size(path: Path) -> int:
+    """Calculate total size of a directory. Best-effort, returns 0 on error.
+
+    Iterative ``os.scandir`` rather than ``Path.rglob``: the home contains
+    ``node_modules`` and virtualenvs, and rglob's per-entry ``Path`` objects
+    plus double stat made a capacity check take minutes. Symlinks and Windows
+    reparse points are skipped (same policy as before, minus the chance of
+    looping through a junction).
+    """
+    total = 0
+    stack = [str(path)]
+    while stack:
+        current = stack.pop()
+        try:
+            with os.scandir(current) as entries:
+                for entry in entries:
+                    try:
+                        if entry.is_symlink():
+                            continue
+                        if entry.is_dir(follow_symlinks=False):
+                            if sys.platform == "win32" and _is_reparse_point(entry):
+                                continue
+                            stack.append(entry.path)
+                        elif entry.is_file(follow_symlinks=False):
+                            total += entry.stat(follow_symlinks=False).st_size
+                    except (OSError, ValueError):
+                        continue
+        except (OSError, ValueError):
+            continue
     return total
 
 
@@ -357,10 +384,19 @@ def classify_capacity(free_bytes: int) -> StorageLevel:
         return StorageLevel.EMERGENCY
 
 
-def check_disk_capacity(home: Optional[Path] = None) -> CapacityStatus:
+def check_disk_capacity(
+    home: Optional[Path] = None,
+    *,
+    include_hermes_size: bool = True,
+) -> CapacityStatus:
     """Check system-wide disk capacity and Hermes storage.
 
     Returns a CapacityStatus with all fields populated.  Never raises.
+
+    ``include_hermes_size`` controls the recursive size walk of the whole home.
+    It is thorough but slow on a checkout that vendors ``node_modules`` and
+    virtualenvs, so interactive surfaces pass ``False`` and rely on the
+    per-location sizes instead.
     """
     status = CapacityStatus(checked_at=datetime.now(timezone.utc).isoformat())
     h = home or get_hermes_home()
@@ -380,11 +416,12 @@ def check_disk_capacity(home: Optional[Path] = None) -> CapacityStatus:
         return status
 
     # Hermes directory size
-    try:
-        status.hermes_size_bytes = _dir_size(h)
-        status.hermes_size_gb = round(status.hermes_size_bytes / _GB, 2)
-    except Exception:
-        pass
+    if include_hermes_size:
+        try:
+            status.hermes_size_bytes = _dir_size(h)
+            status.hermes_size_gb = round(status.hermes_size_bytes / _GB, 2)
+        except Exception:
+            pass
 
     # Probe storage locations
     status.locations = _get_storage_locations(h)
@@ -773,13 +810,27 @@ def check_all_databases(hermes_home: Optional[Path] = None) -> List[Dict[str, An
 # Storage location summary
 # ---------------------------------------------------------------------------
 
-def get_storage_summary(hermes_home: Optional[Path] = None) -> Dict[str, Any]:
-    """Get a complete storage summary for Guardian reporting."""
+def get_storage_summary(
+    hermes_home: Optional[Path] = None,
+    *,
+    include_databases: bool = True,
+    include_hermes_size: bool = True,
+) -> Dict[str, Any]:
+    """Get a complete storage summary for Guardian reporting.
+
+    ``include_databases`` runs ``PRAGMA integrity_check`` across every database
+    under the home. That sweep is thorough but slow (minutes on a large home),
+    so interactive surfaces pass ``False`` and call :func:`check_all_databases`
+    on demand; the CLI audit keeps the default full summary.
+
+    ``include_hermes_size=False`` skips the recursive walk of the whole home,
+    which is dominated by vendored ``node_modules``/virtualenvs.
+    """
     home = hermes_home or get_hermes_home()
 
-    capacity = check_disk_capacity(home)
+    capacity = check_disk_capacity(home, include_hermes_size=include_hermes_size)
     failures = detect_storage_failures(home)
-    db_results = check_all_databases(home)
+    db_results = check_all_databases(home) if include_databases else []
 
     # Count locations by category
     category_sizes: Dict[str, int] = {}

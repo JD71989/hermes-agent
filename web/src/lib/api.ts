@@ -769,6 +769,21 @@ export const api = {
       },
     ),
 
+  // Guardian operational surfaces - read-only projections over local stores
+  guardianRevenue: () => fetchJSON<GuardianRevenueSurface>("/api/guardian/revenue"),
+  guardianCommercial: () => fetchJSON<GuardianCommercialSurface>("/api/guardian/commercial"),
+  guardianIntelligence: () => fetchJSON<GuardianIntelligenceSurface>("/api/guardian/intelligence"),
+  guardianCreators: () => fetchJSON<GuardianCreatorsSurface>("/api/guardian/creators"),
+  guardianMarketing: () => fetchJSON<GuardianMarketingSurface>("/api/guardian/marketing"),
+  guardianCrypto: () => fetchJSON<GuardianCryptoSurface>("/api/guardian/crypto"),
+  guardianTrading: () => fetchJSON<GuardianTradingSurface>("/api/guardian/trading"),
+  guardianCyberlab: () => fetchJSON<GuardianCyberlabSurface>("/api/guardian/cyberlab"),
+  guardianAutomation: () => fetchJSON<GuardianAutomationSurface>("/api/guardian/automation"),
+  guardianSystem: () => fetchJSON<GuardianSystemSurface>("/api/guardian/system"),
+  guardianStorage: () => fetchJSON<GuardianStorageSurface>("/api/guardian/storage"),
+  guardianDatabaseHealth: (force = false) =>
+    fetchJSON<GuardianDatabaseHealth>(`/api/guardian/storage/databases${force ? "?force=true" : ""}`),
+
   // Cron jobs
   getCronJobs: (profile = "all") =>
     fetchJSON<CronJob[]>(`/api/cron/jobs?profile=${encodeURIComponent(profile)}`),
@@ -3084,4 +3099,358 @@ export interface AgentPluginUpdateResponse {
 export interface PluginProvidersPutRequest {
   memory_provider?: string;
   context_engine?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Guardian operational surfaces
+// ---------------------------------------------------------------------------
+
+/** Where a surface's data came from, so the UI can say "missing" honestly. */
+export interface GuardianSource {
+  configured: boolean;
+  available: boolean;
+  path: string | null;
+  updated_at: string | null;
+  size_bytes: number;
+  error: string | null;
+}
+
+export interface GuardianCapability {
+  id: string;
+  label: string;
+  module: string;
+  present: boolean;
+  required_credentials: string[];
+  credentials_present: boolean;
+}
+
+export interface GuardianJobRow {
+  id: string;
+  name: string;
+  enabled: boolean;
+  schedule: string;
+  last_status: string | null;
+  last_run: string | null;
+}
+
+export interface GuardianAutomation {
+  jobs: GuardianJobRow[];
+}
+
+export interface GuardianExperiment {
+  id: string;
+  name: string;
+  state: string;
+  effective_state: string | null;
+  tier: string | null;
+  reason: string | null;
+  model_profile: string | null;
+}
+
+export interface GuardianRevenueSurface {
+  generated_at: string;
+  policy: {
+    mode?: string;
+    live_trading_enabled?: boolean;
+    withdrawals_enabled?: boolean;
+    leverage_enabled?: boolean;
+    verified_revenue_required?: boolean;
+    portfolio_target?: number;
+    zero_capital?: boolean;
+    [key: string]: unknown;
+  };
+  portfolio: {
+    source: GuardianSource;
+    counts: Record<string, number>;
+    experiments: GuardianExperiment[];
+  };
+  revenue_fabric: {
+    source: GuardianSource;
+    mode: string | null;
+    principle: string | null;
+    engines: Array<{ id?: string; status?: string; monetization?: string[] }>;
+    campaign_targets: Array<{ name?: string; status?: string; details_required?: string[] }>;
+  };
+  opportunities: {
+    source: GuardianSource;
+    status: string | null;
+    verified_revenue_usd: number | null;
+    external_submissions: number | null;
+    approval_rule: string | null;
+    items: Array<Record<string, unknown>>;
+    live_targets: {
+      source: GuardianSource;
+      status: string | null;
+      items: Array<Record<string, unknown>>;
+    };
+    last_run: {
+      source: GuardianSource;
+      status: string | null;
+      count: number | null;
+      generated_at: string | null;
+    };
+  };
+  evidence: {
+    source: GuardianSource;
+    records: number;
+    leads: number;
+    paid_totals: Record<string, number>;
+    verified: boolean;
+    note: string;
+  };
+  approvals: {
+    source: GuardianSource;
+    total: number;
+    pending: number;
+    items: Array<Record<string, unknown>>;
+  };
+  automation: GuardianAutomation;
+  capabilities: GuardianCapability[];
+}
+
+export interface GuardianCommercialSurface {
+  generated_at: string;
+  revenue_root: { configured: boolean; path: string | null };
+  crm: {
+    source: GuardianSource;
+    contact_count: number;
+    by_status: Record<string, number>;
+    contacts: Array<Record<string, unknown>>;
+    categories: string[] | null;
+  };
+  campaigns: {
+    source: GuardianSource;
+    targets: Array<{ name?: string; status?: string; details_required?: string[] }>;
+  };
+  lead_queue: {
+    source: GuardianSource;
+    total: number;
+    items: Array<Record<string, unknown>>;
+  };
+  lead_assets: Array<{
+    key: string;
+    label: string;
+    path: string;
+    exists: boolean;
+    has_public: boolean;
+    has_netlify: boolean;
+    files: number;
+    updated_at: string | null;
+  }>;
+  leadengine: { modules: string[] };
+  bond_delivery: {
+    source: GuardianSource;
+    campaign: string | null;
+    delivery_method: string | null;
+    status: string | null;
+    transport_status: string | null;
+    sender_verification_status: string | null;
+    api_dependency: boolean | null;
+  };
+  automation: GuardianAutomation;
+  credentials: Array<{ name: string; present: boolean }>;
+}
+
+export interface GuardianIntelligenceSurface {
+  generated_at: string;
+  policy: GuardianRevenueSurface["policy"];
+  opportunity_intelligence: {
+    queue: {
+      source: GuardianSource;
+      status: string | null;
+      verified_revenue_usd: number | null;
+      external_submissions: number | null;
+      items: Array<Record<string, unknown>>;
+    };
+    live_targets: { source: GuardianSource; status: string | null; items: Array<Record<string, unknown>> };
+    last_run: {
+      source: GuardianSource;
+      generated_at: string | null;
+      count: number | null;
+      status: string | null;
+    };
+  };
+  markets: { source: GuardianSource; watchlist: unknown };
+  research: {
+    source: GuardianSource;
+    artifacts: Array<{ name: string; kind: string; size_bytes: number; updated_at: string }>;
+  };
+  capabilities: GuardianCapability[];
+  automation: GuardianAutomation;
+  workflows: Array<{
+    id: string;
+    name: string;
+    engine: string;
+    state: string;
+    current_step: number | null;
+    created_at: string | null;
+    last_error: string | null;
+  }>;
+}
+
+export interface GuardianCreatorsSurface {
+  generated_at: string;
+  creator_manifest: {
+    source: GuardianSource;
+    count: number;
+    creators: Array<Record<string, unknown>>;
+  };
+  social_mesh: {
+    campaign: GuardianSource & Record<string, unknown>;
+    demand_signals: {
+      source: GuardianSource;
+      scan_date: string | null;
+      signals: Array<Record<string, unknown>>;
+      constraints: unknown;
+    };
+  };
+  youtube: {
+    config: {
+      source: GuardianSource;
+      status?: string;
+      cadence?: string;
+      formats?: unknown;
+      revenue_verified?: boolean;
+      external_publish?: string;
+    };
+    last_run: { source: GuardianSource; run_date: string | null; status: string | null };
+  };
+  writing: {
+    source: GuardianSource;
+    generated_at: string | null;
+    status: string | null;
+    opportunities: number;
+    top: Array<Record<string, unknown>>;
+    channels: Array<Record<string, unknown>>;
+    queue: { source: GuardianSource; status: string | null; items: number };
+  };
+  media_farm: GuardianSource & {
+    available: boolean;
+    counts: Record<string, number>;
+    recent_content: Array<{
+      title: string;
+      content_type: string;
+      status: string;
+      updated_at: number | null;
+    }>;
+  };
+  pipeline: Array<{ stage: string; count: number; detail: string }>;
+  automation: GuardianAutomation;
+}
+
+export interface GuardianStorageLocation {
+  name: string;
+  path: string;
+  category: string;
+  exists: boolean;
+  readable: boolean;
+  writable: boolean;
+  size_bytes: number;
+  failure: string;
+}
+
+export interface GuardianStorageSurface {
+  generated_at: string;
+  integrity: "not_run" | "checked";
+  capacity: {
+    level: string;
+    free_gb: number;
+    total_gb: number;
+    used_percent: number;
+    hermes_size_gb: number;
+  };
+  locations: GuardianStorageLocation[];
+  category_sizes: Record<string, number>;
+  failures: Array<{ location?: string; path?: string; failure?: string; detail?: string; type?: string }>;
+  databases: GuardianDatabaseRow[];
+  checked_at: string;
+  error?: string;
+}
+
+export interface GuardianDatabaseRow {
+  path: string;
+  valid: boolean;
+  checks: Array<{ name: string; valid: boolean; message?: string }>;
+  error?: string;
+}
+
+export interface GuardianDatabaseHealth {
+  generated_at: string;
+  integrity: "checked";
+  error: string | null;
+  count: number;
+  invalid: number;
+  databases: GuardianDatabaseRow[];
+}
+
+export interface GuardianMarketingSurface {
+  generated_at: string;
+  policy: GuardianRevenueSurface["policy"];
+  lanes: Array<{ lane: string; target: string; description: string; count: number }>;
+  funnel: {
+    opportunities: number;
+    crm_contacts: number;
+    writing_opportunities: number;
+    writing_queue: number;
+    media_content: number;
+    campaign_targets: number;
+  };
+  campaigns: {
+    social_mesh: GuardianSource & Record<string, unknown>;
+    targets: Array<{ name?: string; status?: string; details_required?: string[] }>;
+  };
+  sources: Record<string, GuardianSource>;
+  automation: GuardianAutomation;
+}
+
+export interface GuardianCryptoSurface {
+  generated_at: string;
+  policy: GuardianRevenueSurface["policy"];
+  detector: {
+    status: string;
+    risk_gate: string;
+    paper_trading: string;
+    live_execution: string;
+    demo: { symbol: string; score: number; decision: string; hard_fails: string[]; candidate: Record<string, unknown> };
+    signal_stack: string[];
+  };
+  markets: { source: GuardianSource; watchlist: unknown };
+  capabilities: GuardianCapability[];
+  automation: GuardianAutomation;
+}
+
+export interface GuardianTradingSurface {
+  generated_at: string;
+  policy: GuardianRevenueSurface["policy"];
+  lanes: Array<{ lane: string; mode: string; status: string }>;
+  opportunity_intelligence: GuardianIntelligenceSurface["opportunity_intelligence"];
+  markets: { source: GuardianSource; watchlist: unknown };
+  workflows: GuardianIntelligenceSurface["workflows"];
+  capabilities: GuardianCapability[];
+  automation: GuardianAutomation;
+}
+
+export interface GuardianCyberlabSurface {
+  generated_at: string;
+  policy: { mode: string; offensive_execution: boolean; read_only_health_checks: boolean; requires_explicit_authorisation: boolean };
+  status: Record<string, string>;
+  vault: { source: GuardianSource; status: string | null };
+  physical_security: { source: GuardianSource; status: string | null };
+  boundary: { allowed: string[]; forbidden: string[] };
+  automation: GuardianAutomation;
+}
+
+export interface GuardianAutomationSurface {
+  generated_at: string;
+  cron: { jobs: GuardianJobRow[]; source: { configured: boolean; available: boolean } };
+  workflows: GuardianIntelligenceSurface["workflows"];
+  approvals: { source: GuardianSource; total: number; pending: number; items: Array<Record<string, unknown>> };
+  automation: GuardianAutomation;
+}
+
+export interface GuardianSystemSurface {
+  generated_at: string;
+  storage: GuardianStorageSurface;
+  cron: { jobs: GuardianJobRow[] };
+  links: Array<{ label: string; path: string; description: string }>;
 }

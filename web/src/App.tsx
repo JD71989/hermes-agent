@@ -98,6 +98,16 @@ const SystemPage = lazy(() => import("@/pages/SystemPage"));
 const ChatPage = lazy(() => import("@/pages/ChatPage"));
 const GuardianCommandCentre = lazy(() => import("@/pages/GuardianCommandCentre"));
 const GuardianVaultPage = lazy(() => import("@/pages/GuardianVaultPage"));
+const GuardianRevenuePage = lazy(() => import("@/pages/GuardianRevenuePage"));
+const GuardianCommercialPage = lazy(() => import("@/pages/GuardianCommercialPage"));
+const GuardianMarketingPage = lazy(() => import("@/pages/GuardianMarketingPage"));
+const GuardianCreatorsPage = lazy(() => import("@/pages/GuardianCreatorsPage"));
+const GuardianCryptoPage = lazy(() => import("@/pages/GuardianCryptoPage"));
+const GuardianTradingPage = lazy(() => import("@/pages/GuardianTradingPage"));
+const GuardianIntelligencePage = lazy(() => import("@/pages/GuardianIntelligencePage"));
+const GuardianCyberlabPage = lazy(() => import("@/pages/GuardianCyberlabPage"));
+const GuardianAutomationPage = lazy(() => import("@/pages/GuardianAutomationPage"));
+const GuardianSystemPage = lazy(() => import("@/pages/GuardianSystemPage"));
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useI18n } from "@/i18n";
@@ -160,6 +170,16 @@ const BUILTIN_ROUTES_CORE: Record<string, ComponentType> = {
   "/": RootRedirect,
   "/guardian": GuardianCommandCentre,
   "/guardian/vault": GuardianVaultPage,
+  "/guardian/revenue": GuardianRevenuePage,
+  "/guardian/commercial": GuardianCommercialPage,
+  "/guardian/marketing": GuardianMarketingPage,
+  "/guardian/creators": GuardianCreatorsPage,
+  "/guardian/crypto": GuardianCryptoPage,
+  "/guardian/trading": GuardianTradingPage,
+  "/guardian/intelligence": GuardianIntelligencePage,
+  "/guardian/cyberlab": GuardianCyberlabPage,
+  "/guardian/automation": GuardianAutomationPage,
+  "/guardian/system": GuardianSystemPage,
   "/sessions": SessionsPage,
   "/files": FilesPage,
   "/analytics": AnalyticsPage,

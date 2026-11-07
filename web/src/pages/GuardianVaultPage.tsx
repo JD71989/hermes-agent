@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Copy, Eye, EyeOff, KeyRound, LockKeyhole, Plus, RefreshCw, ShieldCheck, Trash2, Unlock, WalletCards, UserRound } from "lucide-react";
+import { copyTextToClipboard } from "@/lib/clipboard";
 import { api, type GuardianVaultAuditRow, type GuardianVaultCredential, type GuardianVaultStatus, type GuardianVaultWithdrawn, type GuardianWallet, type GuardianWalletCreated, type GuardianWalletWithdrawn, type GuardianIdentity } from "@/lib/api";
 
 type Form = {
@@ -187,8 +188,9 @@ export default function GuardianVaultPage() {
   }
 
   async function copy(value: string) {
-    try { await navigator.clipboard.writeText(value); setMessage("Copied."); }
-    catch { setMessage("Clipboard unavailable."); }
+    // copyTextToClipboard falls back to a selection-based copy on plain-HTTP
+    // dashboards, where navigator.clipboard is undefined.
+    setMessage((await copyTextToClipboard(value)) ? "Copied." : "Clipboard unavailable.");
   }
 
   const configured = Boolean(status?.configured);

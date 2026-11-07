@@ -943,6 +943,7 @@ from hermes_cli.web_routers import (  # noqa: E402
     guardian_workflows as _guardian_workflow_routes,
     guardian_vault as _guardian_vault_routes,
     guardian_assets as _guardian_assets_routes,
+    guardian_ops as _guardian_ops_routes,
     mcp as _mcp_routes,
     ops as _ops_routes,
     skills as _skills_routes,
@@ -974,6 +975,7 @@ app.include_router(_cron_routes.router)
 app.include_router(_guardian_workflow_routes.router)
 app.include_router(_guardian_vault_routes.router)
 app.include_router(_guardian_assets_routes.router)
+app.include_router(_guardian_ops_routes.router)
 app.include_router(_mcp_routes.router)
 app.include_router(_ops_routes.router)
 app.include_router(_skills_routes.hub_router)

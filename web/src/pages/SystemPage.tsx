@@ -43,6 +43,7 @@ import { ConfirmDialog } from "@nous-research/ui/ui/components/confirm-dialog";
 import { useModalBehavior } from "@/hooks/useModalBehavior";
 import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
 import { HermesConsoleModal } from "@/components/HermesConsoleModal";
+import { GuardianStorageCard } from "@/components/GuardianStorageCard";
 import { cn, themedBody } from "@/lib/utils";
 import { api } from "@/lib/api";
 import { copyTextToClipboard } from "@/lib/clipboard";
@@ -1080,6 +1081,13 @@ export default function SystemPage() {
       </section>
 
       {/* ── Curator ───────────────────────────────────────────────── */}
+      <section className="flex flex-col gap-3">
+        <H2 variant="sm" className="flex items-center gap-2 text-muted-foreground">
+          <HardDrive className="h-4 w-4" /> Storage
+        </H2>
+        <GuardianStorageCard />
+      </section>
+
       <section className="flex flex-col gap-3">
         <H2 variant="sm" className="flex items-center gap-2 text-muted-foreground">
           <Sparkles className="h-4 w-4" /> Skill curator

@@ -45,6 +45,22 @@ describe("resolvePageTitle", () => {
     ).toBe("Kanban");
   });
 
+  it("gives every Guardian surface its own title", () => {
+    // All six live under the single /guardian sidebar entry, so a missing
+    // literal would make each tab read "Guardian" (the capitalize fallback).
+    const titles = [
+      "/guardian",
+      "/guardian/vault",
+      "/guardian/revenue",
+      "/guardian/commercial",
+      "/guardian/intelligence",
+      "/guardian/creators",
+    ].map((path) => resolvePageTitle(path, t, []));
+
+    expect(new Set(titles).size).toBe(titles.length);
+    expect(titles[0]).toBe("Guardian Command Centre");
+  });
+
   it("falls back to capitalized path segment for unknown routes", () => {
     expect(resolvePageTitle("/whatever", t, [])).toBe("Whatever");
   });
